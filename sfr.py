@@ -2,6 +2,7 @@
 import os
 import sys
 import numpy as np
+from astrodatapy.number_density import number_density
 import matplotlib.pyplot as plt
 from bigfile import BigFile
 
@@ -76,6 +77,28 @@ def plot_avg_sfr(reds, outdir):
         j = np.where(sfrs[:,i,1] > 0)
         plt.plot(reds[j], sfrs[j[0],i,1], label=labels[i], color=colors[i])
         np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
+
+    color2 = {'Song2016':'#0099e6','Grazian2015':'#7f8c83','Gonzalez2011':'#ffa64d',\
+          'Duncan2014':'#F08080','Stefanon2017':'#30ba52'}
+    marker2 = {'Song2016':'o','Grazian2015':'s','Gonzalez2011':'v',\
+          'Duncan2014':'^','Stefanon2017':'<'}
+    obs = number_density(feature="SFRF",z_target=redshift,quiet=1,h=hh)
+    for ii in range(obs.n_target_observation):
+        data       = obs.target_observation['Data'][ii]
+        label      = obs.target_observation.index[ii]
+        datatype   = obs.target_observation['DataType'][ii]
+        if datatype == 'data':
+            data[:,1:] = np.log10(data[:,1:])
+            try:
+                color      = color2[label]
+                marker     = marker2[label]
+            except KeyError:
+                color = None
+                marker = 'o'
+            plt.errorbar(data[:,0],  data[:,1], yerr = [data[:,1]-data[:,3],data[:,2]- data[:,1]],\
+                        label=label,color=color,fmt=marker)
+        else:
+            continue
     plt.xlabel("z")
     plt.ylabel(r"SFR ($M_\odot$ yr$^{-1}$)")
     plt.legend(loc="upper right")
