@@ -365,6 +365,7 @@ def plot_power(reds, outdir):
         (kk, pk) = get_power(os.path.join(outdir, "powerspectrum-%.4f.txt" % a))
         plt.loglog(kk, pk, label="z=%.1f" % (1/a-1))
     plt.legend()
+    plt.savefig("matterpower")
 
 if __name__ == "__main__":
     simdir = sys.argv[1]
