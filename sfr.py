@@ -358,13 +358,11 @@ def get_power(matpow, rebin=True):
         return modecount_rebin(kk, pk, modes)
     return (kk,pk)
 
-def plot_power(reds):
+def plot_power(reds, outdir):
     """Plot some matter power spectra"""
-
     aa = 1/(1+reds)
     for a in aa:
-        power = np.loadtxt("powerspectrum-%.4f.txt" % a)
-        (kk, pk) = get_power(power)
+        (kk, pk) = get_power(path.join(outdir, "powerspectrum-%.4f.txt" % a))
         plt.loglog(kk, pk, label="z=%.1f" % 1/a-1)
     plt.legend()
 
@@ -381,7 +379,7 @@ if __name__ == "__main__":
     plt.clf()
     plot_ssfr(red, outdir=simdir)
     plt.clf()
-    plot_power([4,3.5,3])
+    plot_power([4,3.5,3], outdir=simdir)
     plt.clf()
     reds2 = np.array([12, 10, 8, 6, 4, 3])
     plot_smhms(reds2, outdir=simdir, metal=True)
