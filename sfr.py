@@ -363,7 +363,7 @@ def plot_power(reds, outdir):
     aa = 1/(1+reds)
     for a in aa:
         (kk, pk) = get_power(os.path.join(outdir, "powerspectrum-%.4f.txt" % a))
-        plt.loglog(kk, pk, label="z=%.1f" % 1/a-1)
+        plt.loglog(kk, pk, label="z=%.1f" % (1/a-1))
     plt.legend()
 
 if __name__ == "__main__":
