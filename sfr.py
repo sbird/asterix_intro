@@ -144,6 +144,61 @@ def plot_avg_sfr_reion(reds, outdir):
     plt.ylim(ymin=1e-5)
     plt.savefig("avg_sfr_reion")
 
+def get_avg_sfr_heii_reion(pig):
+    """Get the averaged SFR for some different halo masses."""
+    bf = BigFile(pig)
+
+    fofmasses = bf['FOFGroups/Mass'][:]*1e10/bf["Header"].attrs["HubbleParam"]
+    sfr = bf['FOFGroups/StarFormationRate'][:]
+    offsets = np.concatenate((np.zeros(1), np.cumsum(bf['FOFGroups/LengthByType'][:][:,0])))
+    massbins = np.array([4e9, 1e10, 1e11])
+    avgsfr_reion = np.zeros((len(massbins),3))
+    avgsfr_no_reion = np.zeros((len(massbins),3))
+    for i, mm in enumerate(massbins):
+        ii = np.where((fofmasses < mm*1.3)*(fofmasses > mm / 1.3))
+        if np.size(ii) == 0:
+            print("no halos for mass %g pig %s" % (mm, pig))
+            continue
+        print("mass %.1f : %d" % (mm, np.size(ii)))
+        heiifrac = np.array([np.mean(bf['0/HeIIIIonized'][int(offsets[i]):int(offsets[i]+10)]) for i in ii[0]])
+        jj = np.where(heiifrac > 0.9)
+        if np.size(jj) > 0:
+            avgsfr_reion[i] = np.percentile(sfr[ii][jj], [16, 50, 84])
+        jj = np.where(heiifrac < 0.1)
+        if np.size(jj) > 0:
+            avgsfr_no_reion[i] = np.percentile(sfr[ii][jj], [16, 50, 84])
+    del offsets
+    del sfr
+    del fofmasses
+    return avgsfr_reion, avgsfr_no_reion
+
+def plot_avg_sfr_heii_reion(reds, outdir):
+    """Average SFR over time"""
+    snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
+    pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
+    colors_reion = ["darkred", "blue", "brown", "green"]
+    colors_no_reion = ["red", "cyan", "orange", "lightgreen"]
+    labels = [r"$5\times 10^{9}$", r"$10^{10}$", r"$5\times 10^{10}$"]
+    sfrs_reion, sfrs_no_reion = zip(*[get_avg_sfr_heii_reion(pig) for pig in pigs])
+    sfrs_reion = np.array(sfrs_reion)
+    sfrs_no_reion = np.array(sfrs_no_reion)
+    for i in range(np.shape(sfrs_reion)[1]):
+        j = np.where(sfrs_reion[:,i,2] > 0)
+        plt.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], color=colors_reion[i], alpha=0.2)
+        j = np.where(sfrs_reion[:,i,1] > 0)
+        plt.plot(reds[j], sfrs_reion[j[0],i,1], label=labels[i]+" reion", color=colors_reion[i], ls="-")
+        j = np.where(sfrs_no_reion[:,i,2] > 0)
+        plt.fill_between(reds[j], sfrs_no_reion[j[0],i,0]+1e-14, sfrs_no_reion[j[0],i,2], color=colors_no_reion[i], alpha=0.2)
+        j = np.where(sfrs_no_reion[:,i,1] > 0)
+        plt.plot(reds[j], sfrs_no_reion[j[0],i,1], label=labels[i]+" no reion", color=colors_no_reion[i], ls="--")
+        #np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
+    plt.xlabel("z")
+    plt.ylabel(r"SFR ($M_\odot$ yr$^{-1}$)")
+    plt.legend(loc="upper left")
+    plt.yscale('log')
+    plt.ylim(ymin=1e-5)
+    plt.savefig("avg_sfr_heii_reion")
+
 def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
     bf = BigFile(pig)
@@ -152,32 +207,32 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
         if metal:
             metals = bf["FOFGroups/StellarMetalMass"][:]
             starmass = bf['FOFGroups/MassByType'][:][:,4]
-            stellarmasses = metals/starmass
-            del starmass
-            del metals
         else:
             stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10
     else:
         if metal:
             metals = bf["FOFGroups/GasMetalMass"][:]
             starmass = bf['FOFGroups/MassByType'][:][:,0]
-            stellarmasses = metals/starmass
-            del starmass
-            del metals
         else:
             stellarmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10
     omega0 = bf["Header"].attrs["Omega0"]
     omegab = bf["Header"].attrs["OmegaBaryon"]
     zz = 1/bf["Header"].attrs["Time"]-1
-    smhm = stellarmasses/fofmasses
-    del stellarmasses
-    del fofmasses
+    if metal:
+        ii = np.where(starmass > 0)
+        smhm = metals[ii]/starmass[ii]
+        fofmasses = fofmasses[ii]
+        del starmass
+        del metals
+    else:
+        smhm = stellarmasses/fofmasses
+        del stellarmasses
     label = "z=%.1f" % zz
     massbins = np.logspace(9, 14, 50)
     smhm_bin = np.zeros(np.size(massbins)-1)
     smhm_lower = np.zeros(np.size(massbins)-1)
     smhm_upper = np.zeros(np.size(massbins)-1)
-    if metals:
+    if metal:
         factor = 1/0.0122
     else:
         factor = omega0 / omegab
@@ -212,12 +267,14 @@ def plot_smhms(reds, outdir, star=True, metal=False):
     colors = ["black", "red", "blue", "brown", "pink", "orange"]
     lss = ["-", "-.", "--", ":"]
     for ii in np.arange(len(reds)):
-        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star)
+        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
     if star:
         if metal:
             plt.legend(loc="upper left")
             plt.ylabel(r"Z$_*$ (Z$_\odot$)")
+            #plt.ylim(ymin=3e-4)
+            plt.yscale('log')
             plt.savefig("starmetal")
         else:
             plt.legend(loc="upper left")
@@ -225,7 +282,9 @@ def plot_smhms(reds, outdir, star=True, metal=False):
             plt.savefig("smhms")
     else:
         if metal:
-            plt.legend(loc="upper left")
+            plt.legend(loc="lower center")
+            #plt.ylim(ymax=1.1)
+            plt.yscale('log')
             plt.ylabel(r"Z$_\mathrm{g}$ (Z$_\odot$)")
             plt.savefig("gasmetal")
         else:
@@ -260,23 +319,81 @@ def plot_zreion(outdir, zval=0):
     plt.ylabel(r'y (Mpc/h)')
     plt.savefig("reion_slice")
 
+def modecount_rebin(kk, pk, modes, minmodes=20, ndesired=200):
+    """Rebins a power spectrum so that there are sufficient modes in each bin"""
+    assert np.all(kk) > 0
+    logkk=np.log10(kk)
+    mdlogk = (np.max(logkk) - np.min(logkk))/ndesired
+    istart=iend=1
+    count=0
+    k_list=[kk[0]]
+    pk_list=[pk[0]]
+    targetlogk=mdlogk+logkk[istart]
+    while iend < np.size(logkk)-1:
+        count+=modes[iend]
+        iend+=1
+        if count >= minmodes and logkk[iend-1] >= targetlogk:
+            pk1 = np.sum(modes[istart:iend]*pk[istart:iend])/count
+            kk1 = np.sum(modes[istart:iend]*kk[istart:iend])/count
+            k_list.append(kk1)
+            pk_list.append(pk1)
+            istart=iend
+            targetlogk=mdlogk+logkk[istart]
+            count=0
+    k_list = np.array(k_list)
+    pk_list = np.array(pk_list)
+    return (k_list, pk_list)
+
+def get_power(matpow, rebin=True):
+    """Plot the power spectrum from CAMB
+    (or anything else where no changes are needed)"""
+    data = np.loadtxt(matpow)
+    kk = data[:,0]
+    ii = np.where(kk > 0.)
+    #Rebin power so that there are enough modes in each bin
+    kk = kk[ii]
+    pk = data[:,1][ii]
+    if rebin:
+        modes = data[:,2][ii]
+        return modecount_rebin(kk, pk, modes)
+    return (kk,pk)
+
+def plot_power(reds):
+    """Plot some matter power spectra"""
+
+    aa = 1/(1+reds)
+    for a in aa:
+        power = np.loadtxt("powerspectrum-%.4f.txt" % a)
+        (kk, pk) = get_power(power)
+        plt.loglog(kk, pk, label="z=%.1f" % 1/a-1)
+    plt.legend()
+
 if __name__ == "__main__":
     simdir = sys.argv[1]
-    #red = np.array([9, 8.3, 8, 7.5, 7, 6, 6.5, 5])
-    red = np.array([9, 8, 7, 6, 5])
+    red = np.array([9, 8.3, 8, 7.5, 7, 6.5, 6, 5])
     plot_avg_sfr_reion(red, outdir=simdir)
     plt.clf()
-    #red = np.array([12,10,9,8,7,6,5,4.53,4,3.5,3.0])
-    #plot_avg_sfr(red, outdir=simdir)
+    #red = np.array([4,3.5,3.0])
+    #plot_avg_sfr_heii_reion(red, outdir=simdir)
     #plt.clf()
-    #plot_ssfr(red, outdir=simdir)
-    #plt.clf()
+    red = np.array([12,10,9,8,7,6,5,4.53,4,3.5,3.0])
+    plot_avg_sfr(red, outdir=simdir)
+    plt.clf()
+    plot_ssfr(red, outdir=simdir)
+    plt.clf()
+    plot_power([4,3.5,3])
+    plt.clf()
     reds2 = np.array([12, 10, 8, 6, 4, 3])
-    #plot_smhms(reds2, outdir=simdir)
-    #plt.clf()
-    #plot_smhms(reds2, outdir=simdir, star=False)
-    #plt.clf()
-    #plot_reionization_history(outdir=simdir)
-    #plt.clf()
+    plot_smhms(reds2, outdir=simdir, metal=True)
+    plt.clf()
+    plot_smhms(reds2, outdir=simdir, star=False, metal=True)
+    plt.clf()
+    plot_smhms(reds2, outdir=simdir)
+    plt.clf()
+    plot_smhms(reds2, outdir=simdir, star=False)
+    plt.clf()
+
+    plot_reionization_history(outdir=simdir)
+    plt.clf()
     plot_zreion(outdir=simdir)
     plt.clf()
