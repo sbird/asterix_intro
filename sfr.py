@@ -85,8 +85,8 @@ def plot_avg_sfr(reds, outdir):
         j = np.where(sfrs[:,i,1] > 0)
         plt.plot(reds[j], sfrs[j[0],i,1], label=labels[i], color=colors[i])
         np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
-    for mm in (11, 12, 13):
-        plot_behroozi_sfr(mm)
+    #for mm in (11, 12, 13):
+        #plot_behroozi_sfr(mm)
     plt.xlabel("z")
     plt.ylabel(r"SFR ($M_\odot$ yr$^{-1}$)")
     plt.legend(loc="upper right")
