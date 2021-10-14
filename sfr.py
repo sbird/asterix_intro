@@ -393,7 +393,7 @@ if __name__ == "__main__":
     plt.clf()
     plot_ssfr(red, outdir=simdir)
     plt.clf()
-    plot_power(np.array([4,3.5,3]), outdir=simdir)
+    plot_power(np.array([10, 8, 6.1, 4,3.5,3]), outdir=simdir)
     plt.clf()
     reds2 = np.array([12, 10, 8, 6, 4, 3])
     plot_smhms(reds2, outdir=simdir, metal=True)
