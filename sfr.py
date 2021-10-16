@@ -4,6 +4,12 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from bigfile import BigFile
+import matplotlib.font_manager
+plt.rcParams['axes.linewidth'] = 1.8
+plt.rcParams["font.family"] = "serif"
+plt.rcParams['font.size'] = 18
+plt.rc('xtick', labelsize=17)
+plt.rc('ytick', labelsize=17)
 
 def find_snapshot(reds, snaptxt="Snapshots.txt"):
     """Find a snapshot at the desired redshift"""
@@ -32,11 +38,14 @@ def plot_ssfr(reds, outdir):
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "green"]
+    lss = ["-", "--", ":", "-."]
     labels = [r"$4\times 10^6$", r"$10^7$", r"$10^8$", r"$10^{9}$", r"$10^{10}$"]
     ssfrs = np.array([get_ssfr(pig) for pig in pigs])
     for i in range(np.shape(ssfrs)[1]):
         j = np.where(ssfrs[:,i,1] > 0)
-        plt.fill_between(reds[j], ssfrs[j[0],i,0]+1e-13, ssfrs[j[0],i,2], color=colors[i], alpha=0.3)
+        ls = lss[i % len(lss)]
+        if i == 2 or i == 3:
+            plt.fill_between(reds[j], ssfrs[j[0],i,0]+1e-13, ssfrs[j[0],i,2], color=colors[i], alpha=0.15, ls=ls)
         plt.plot(reds[j], ssfrs[j[0],i,1], label=labels[i], color=colors[i])
         np.savetxt("ssfr-mstar%d.txt" % i, np.vstack((reds[j], ssfrs[j[0],i,:].T)).T, header="# M* = "+labels[i]+" (redshift : sSFR 16, 50, 84 percentiles)")
     plt.xlabel("z")
@@ -77,13 +86,15 @@ def plot_avg_sfr(reds, outdir):
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "green"]
+    lss = ["-", "--", ":", "-."]
     labels = [r"$2\times 10^{9}$", r"$10^{10}$", r"$10^{11}$", r"$10^{12}$", r"$10^{13}$"]
     sfrs = np.array([get_avg_thing(pig, thing="StarFormationRate") for pig in pigs])
     for i in range(np.shape(sfrs)[1]):
         j = np.where(sfrs[:,i,2] > 0)
-        plt.fill_between(reds[j], sfrs[j[0],i,0]+1e-14, sfrs[j[0],i,2], color=colors[i], alpha=0.3)
+        plt.fill_between(reds[j], sfrs[j[0],i,0]+1e-14, sfrs[j[0],i,2], color=colors[i], alpha=0.15)
         j = np.where(sfrs[:,i,1] > 0)
-        plt.plot(reds[j], sfrs[j[0],i,1], label=labels[i], color=colors[i])
+        ls = lss[i % len(lss)]
+        plt.plot(reds[j], sfrs[j[0],i,1], label=labels[i], color=colors[i], ls=ls)
         np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
     #for mm in (11, 12, 13):
         #plot_behroozi_sfr(mm)
@@ -140,19 +151,19 @@ def plot_avg_sfr_reion(reds, outdir):
     sfrs_no_reion = np.array(sfrs_no_reion)
     for i in range(np.shape(sfrs_reion)[1]):
         j = np.where(sfrs_reion[:,i,2] > 0)
-        plt.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], color=colors_reion[i], alpha=0.2)
+        plt.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], color=colors_reion[i], alpha=0.15)
         j = np.where(sfrs_reion[:,i,1] > 0)
-        plt.plot(reds[j], sfrs_reion[j[0],i,1], label=labels[i]+" reion", color=colors_reion[i], ls="-")
+        plt.plot(reds[j], sfrs_reion[j[0],i,1], label="HII: "+labels[i], color=colors_reion[i], ls="-")
         j = np.where(sfrs_no_reion[:,i,2] > 0)
-        plt.fill_between(reds[j], sfrs_no_reion[j[0],i,0]+1e-14, sfrs_no_reion[j[0],i,2], color=colors_no_reion[i], alpha=0.2)
+        plt.fill_between(reds[j], sfrs_no_reion[j[0],i,0]+1e-14, sfrs_no_reion[j[0],i,2], color=colors_no_reion[i], alpha=0.15)
         j = np.where(sfrs_no_reion[:,i,1] > 0)
-        plt.plot(reds[j], sfrs_no_reion[j[0],i,1], label=labels[i]+" no reion", color=colors_no_reion[i], ls="--")
+        plt.plot(reds[j], sfrs_no_reion[j[0],i,1], label="HI: " + labels[i], color=colors_no_reion[i], ls="--")
         #np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
     plt.xlabel("z")
     plt.ylabel(r"SFR ($M_\odot$ yr$^{-1}$)")
-    plt.legend(loc="upper left")
+    plt.legend(loc="lower left", ncol=4)
     plt.yscale('log')
-    plt.ylim(ymin=1e-5)
+    plt.ylim(ymin=1e-6)
     plt.savefig("avg_sfr_reion")
 
 def get_avg_sfr_heii_reion(pig):
@@ -382,7 +393,7 @@ def plot_power(reds, outdir):
 
 if __name__ == "__main__":
     simdir = sys.argv[1]
-    red = np.array([9, 8.3, 8, 7.5, 7, 6.5, 6, 5])
+    red = np.array([9, 8.3, 8, 7.5, 7, 6.5, 6, 5.5])
     plot_avg_sfr_reion(red, outdir=simdir)
     plt.clf()
     #red = np.array([4,3.5,3.0])
