@@ -23,7 +23,8 @@ def get_ssfr(pig):
     bf = BigFile(pig)
     sfr = bf['FOFGroups/StarFormationRate'][:]
     stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10
-    massbins = np.array([4e6, 1e7, 1e8, 1e9, 1e10])
+    #massbins = np.array([4e6, 1e7, 1e8, 1e9, 1e10])
+    massbins = np.array([1e7, 1e8, 1e9])
     avgssfr = np.zeros((np.size(massbins),3))
     for i, mm in enumerate(massbins):
         ii = np.where((stellarmasses < mm*1.3)*(stellarmasses > mm / 1.3))
@@ -39,20 +40,21 @@ def plot_ssfr(reds, outdir):
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "green"]
     lss = ["-", "--", ":", "-."]
-    labels = [r"$4\times 10^6$", r"$10^7$", r"$10^8$", r"$10^{9}$", r"$10^{10}$"]
+    #labels = [r"$4\times 10^6$", r"$10^7$", r"$10^8$", r"$10^{9}$", r"$10^{10}$"]
+    labels = [r"$10^7$", r"$10^8$", r"$10^{9}$"]
     ssfrs = np.array([get_ssfr(pig) for pig in pigs])
     for i in range(np.shape(ssfrs)[1]):
         j = np.where(ssfrs[:,i,1] > 0)
         ls = lss[i % len(lss)]
-        if i == 2 or i == 3:
-            plt.fill_between(reds[j], ssfrs[j[0],i,0]+1e-13, ssfrs[j[0],i,2], color=colors[i], alpha=0.15, ls=ls)
-        plt.plot(reds[j], ssfrs[j[0],i,1], label=labels[i], color=colors[i])
+        #if i == 2 or i == 3:
+        #plt.fill_between(reds[j], ssfrs[j[0],i,0]+1e-13, ssfrs[j[0],i,2], color=colors[i], alpha=0.15)
+        plt.plot(reds[j], ssfrs[j[0],i,1], label=labels[i], color=colors[i], ls=ls)
         np.savetxt("ssfr-mstar%d.txt" % i, np.vstack((reds[j], ssfrs[j[0],i,:].T)).T, header="# M* = "+labels[i]+" (redshift : sSFR 16, 50, 84 percentiles)")
     plt.xlabel("z")
     plt.ylabel(r"sSFR (yr$^{-1}$)")
-    plt.legend(loc="upper right")
+    plt.legend(loc="lower right")
     plt.yscale('log')
-    plt.ylim(1e-9,3e-8)
+    plt.ylim(1e-9,4e-8)
     plt.tight_layout()
     plt.savefig("ssfr")
 
@@ -397,7 +399,7 @@ def plot_power(reds, outdir):
         plt.loglog(kk, pk, label="z=%.1f" % (1/a-1))
     for zz in reds:
         (kk, pk) = get_power(os.path.join(outdir, "class-planck15/ics_matterpow_99.dat-%.1f.txt" % zz), rebin=False)
-        plt.loglog(kk, pk, ls = "--", label="z=%.1f" % zz)
+        plt.loglog(kk, pk, ls = "--", label="z=%d" % zz)
     plt.legend()
     plt.ylabel(r"P(k) (Mpc/h)$^3$")
     plt.xlabel(r"k (h/Mpc)")
@@ -417,7 +419,7 @@ if __name__ == "__main__":
     plt.clf()
     plot_ssfr(red, outdir=simdir)
     plt.clf()
-    plot_power(np.array([10, 8, 6.12, 4,3.5,3]), outdir=simdir)
+    plot_power(np.array([10, 8, 6.12, 4, 3]), outdir=simdir)
     plt.clf()
     reds2 = np.array([12, 10, 8, 6, 4, 3])
     plot_smhms(reds2, outdir=simdir, metal=True)
