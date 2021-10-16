@@ -142,8 +142,8 @@ def plot_avg_sfr_reion(reds, outdir):
     """Average SFR over time"""
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
-    colors_reion = ["darkred", "blue", "brown", "green"]
-    colors_no_reion = ["red", "cyan", "orange", "lightgreen"]
+    colors_reion = ["darkred", "navy", "brown", "black"]
+    colors_no_reion = ["red", "blue", "orange", "grey"]
     labels = [r"$2\times 10^{9}$", r"$5\times 10^{9}$", r"$10^{10}$", r"$5\times 10^{10}$"]
     uvf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
     zreion = uvf["Zreion_Table"][:]
@@ -205,7 +205,7 @@ def plot_avg_sfr_heii_reion(reds, outdir):
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors_reion = ["darkred", "blue", "brown", "green"]
-    colors_no_reion = ["red", "cyan", "orange", "lightgreen"]
+    colors_no_reion = ["red", "blue", "orange", "grey"]
     labels = [r"$5\times 10^{9}$", r"$10^{10}$", r"$5\times 10^{10}$"]
     sfrs_reion, sfrs_no_reion = zip(*[get_avg_sfr_heii_reion(pig) for pig in pigs])
     sfrs_reion = np.array(sfrs_reion)
@@ -398,7 +398,7 @@ def plot_power(reds, outdir):
         (kk, pk) = get_power(os.path.join(outdir, "powerspectrum-%.4f.txt" % a))
         plt.loglog(kk, pk, label="z=%.1f" % (1/a-1))
     for zz in reds:
-        (kk, pk) = get_power(os.path.join(outdir, "class-planck15/ics_matterpow_99.dat-%.1f.txt" % zz), rebin=False)
+        (kk, pk) = get_power(os.path.join(outdir, "../class-planck15/ics_matterpow_99.dat-%.1f.txt" % zz), rebin=False)
         plt.loglog(kk, pk, ls = "--", label="z=%d" % zz)
     plt.legend()
     plt.ylabel(r"P(k) (Mpc/h)$^3$")
