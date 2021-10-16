@@ -164,6 +164,7 @@ def plot_avg_sfr_reion(reds, outdir):
     plt.legend(loc="lower left", ncol=4)
     plt.yscale('log')
     plt.ylim(ymin=1e-6)
+    plt.xlim(xmin=5.5)
     plt.savefig("avg_sfr_reion")
 
 def get_avg_sfr_heii_reion(pig):
@@ -393,7 +394,7 @@ def plot_power(reds, outdir):
 
 if __name__ == "__main__":
     simdir = sys.argv[1]
-    red = np.array([9, 8.3, 8, 7.5, 7, 6.5, 6, 5.5])
+    red = np.array([9, 8.3, 8, 7.5, 7, 6.5, 6, 5])
     plot_avg_sfr_reion(red, outdir=simdir)
     plt.clf()
     #red = np.array([4,3.5,3.0])
