@@ -53,6 +53,7 @@ def plot_ssfr(reds, outdir):
     plt.legend(loc="upper right")
     plt.yscale('log')
     plt.ylim(1e-9,3e-8)
+    plt.tight_layout()
     plt.savefig("ssfr")
 
 def get_avg_thing(pig, thing="StarFormationRate"):
@@ -103,6 +104,7 @@ def plot_avg_sfr(reds, outdir):
     plt.legend(loc="upper right")
     plt.yscale('log')
     plt.ylim(ymin=1e-5)
+    plt.tight_layout()
     plt.savefig("avg_sfr")
 
 def get_avg_sfr_reion(pig, zreion, nmesh):
@@ -165,6 +167,7 @@ def plot_avg_sfr_reion(reds, outdir):
     plt.yscale('log')
     plt.ylim(ymin=1e-6)
     plt.xlim(xmin=5.5)
+    plt.tight_layout()
     plt.savefig("avg_sfr_reion")
 
 def get_avg_sfr_heii_reion(pig):
@@ -220,6 +223,7 @@ def plot_avg_sfr_heii_reion(reds, outdir):
     plt.legend(loc="upper left")
     plt.yscale('log')
     plt.ylim(ymin=1e-5)
+    plt.tight_layout()
     plt.savefig("avg_sfr_heii_reion")
 
 def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
@@ -292,6 +296,7 @@ def plot_smhms(reds, outdir, star=True, metal=False):
     for ii in np.arange(len(reds)):
         plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
+    plt.tight_layout()
     if star:
         if metal:
             plt.legend(loc="upper left")
@@ -325,6 +330,7 @@ def plot_reionization_history(outdir):
     plt.hist(zreion, 50, cumulative=True, density=True)
     plt.xlabel('z')
     plt.ylabel(r'$x_{hi}$')
+    plt.tight_layout()
     plt.savefig("reion_hist")
 
 def plot_zreion(outdir, zval=0):
@@ -340,6 +346,7 @@ def plot_zreion(outdir, zval=0):
     plt.colorbar()
     plt.xlabel(r'x (Mpc/h)')
     plt.ylabel(r'y (Mpc/h)')
+    plt.tight_layout()
     plt.savefig("reion_slice")
 
 def modecount_rebin(kk, pk, modes, minmodes=20, ndesired=200):
@@ -384,12 +391,17 @@ def get_power(matpow, rebin=True):
 def plot_power(reds, outdir):
     """Plot some matter power spectra"""
     aa = 1/(1+reds)
+    colors = ["black", "red", "blue", "brown", "pink", "orange"]
     for a in aa:
         (kk, pk) = get_power(os.path.join(outdir, "powerspectrum-%.4f.txt" % a))
         plt.loglog(kk, pk, label="z=%.1f" % (1/a-1))
+    for zz in reds:
+        (kk, pk) = get_power(os.path.join(outdir, "class-planck15/ics_matterpow_99.dat-%.1f.txt" % zz), rebin=False)
+        plt.loglog(kk, pk, ls = "--", label="z=%.1f" % zz)
     plt.legend()
     plt.ylabel(r"P(k) (Mpc/h)$^3$")
     plt.xlabel(r"k (h/Mpc)")
+    plt.tight_layout()
     plt.savefig("matterpower")
 
 if __name__ == "__main__":
