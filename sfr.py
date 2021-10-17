@@ -5,11 +5,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from bigfile import BigFile
 import matplotlib.font_manager
+
 plt.rcParams['axes.linewidth'] = 1.8
 plt.rcParams["font.family"] = "serif"
-plt.rcParams['font.size'] = 18
-plt.rc('xtick', labelsize=17)
-plt.rc('ytick', labelsize=17)
+plt.rcParams['font.size'] = 13
+plt.rc('xtick', labelsize=14)
+plt.rc('ytick', labelsize=14)
+plt.rcParams['figure.constrained_layout.use'] = True
 
 def find_snapshot(reds, snaptxt="Snapshots.txt"):
     """Find a snapshot at the desired redshift"""
@@ -23,8 +25,8 @@ def get_ssfr(pig):
     bf = BigFile(pig)
     sfr = bf['FOFGroups/StarFormationRate'][:]
     stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10
-    #massbins = np.array([4e6, 1e7, 1e8, 1e9, 1e10])
-    massbins = np.array([1e7, 1e8, 1e9])
+    massbins = np.array([4e6, 1e7, 1e8, 1e9, 1e10])
+    #massbins = np.array([1e7, 1e8, 1e9])
     avgssfr = np.zeros((np.size(massbins),3))
     for i, mm in enumerate(massbins):
         ii = np.where((stellarmasses < mm*1.3)*(stellarmasses > mm / 1.3))
@@ -40,23 +42,24 @@ def plot_ssfr(reds, outdir):
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "green"]
     lss = ["-", "--", ":", "-."]
-    #labels = [r"$4\times 10^6$", r"$10^7$", r"$10^8$", r"$10^{9}$", r"$10^{10}$"]
-    labels = [r"$10^7$", r"$10^8$", r"$10^{9}$"]
+    labels = [r"$4\times 10^6$", r"$10^7$", r"$10^8$", r"$10^{9}$", r"$10^{10}$"]
+    #labels = [r"$10^7$", r"$10^8$", r"$10^{9}$"]
     ssfrs = np.array([get_ssfr(pig) for pig in pigs])
     for i in range(np.shape(ssfrs)[1]):
         j = np.where(ssfrs[:,i,1] > 0)
         ls = lss[i % len(lss)]
+        if i == 0:
         #if i == 2 or i == 3:
-        #plt.fill_between(reds[j], ssfrs[j[0],i,0]+1e-13, ssfrs[j[0],i,2], color=colors[i], alpha=0.15)
+            plt.fill_between(reds[j], ssfrs[j[0],i,0]+1e-13, ssfrs[j[0],i,2], color=colors[i], alpha=0.15)
         plt.plot(reds[j], ssfrs[j[0],i,1], label=labels[i], color=colors[i], ls=ls)
-        np.savetxt("ssfr-mstar%d.txt" % i, np.vstack((reds[j], ssfrs[j[0],i,:].T)).T, header="# M* = "+labels[i]+" (redshift : sSFR 16, 50, 84 percentiles)")
+        np.savetxt("data/ssfr-mstar%d.txt" % i, np.vstack((reds[j], ssfrs[j[0],i,:].T)).T, header="# M* = "+labels[i]+" (redshift : sSFR 16, 50, 84 percentiles)")
     plt.xlabel("z")
     plt.ylabel(r"sSFR (yr$^{-1}$)")
     plt.legend(loc="lower right")
     plt.yscale('log')
     plt.ylim(1e-9,4e-8)
-    plt.tight_layout()
-    plt.savefig("ssfr")
+    #plt.tight_layout()
+    plt.savefig("ssfr.pdf")
 
 def get_avg_thing(pig, thing="StarFormationRate"):
     """Get the averaged SFR for some different halo masses."""
@@ -98,7 +101,7 @@ def plot_avg_sfr(reds, outdir):
         j = np.where(sfrs[:,i,1] > 0)
         ls = lss[i % len(lss)]
         plt.plot(reds[j], sfrs[j[0],i,1], label=labels[i], color=colors[i], ls=ls)
-        np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
+        np.savetxt("data/asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
     #for mm in (11, 12, 13):
         #plot_behroozi_sfr(mm)
     plt.xlabel("z")
@@ -106,8 +109,8 @@ def plot_avg_sfr(reds, outdir):
     plt.legend(loc="upper right")
     plt.yscale('log')
     plt.ylim(ymin=1e-5)
-    plt.tight_layout()
-    plt.savefig("avg_sfr")
+    #plt.tight_layout()
+    plt.savefig("avg_sfr.pdf")
 
 def get_avg_sfr_reion(pig, zreion, nmesh):
     """Get the averaged SFR for some different halo masses."""
@@ -165,12 +168,12 @@ def plot_avg_sfr_reion(reds, outdir):
         #np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
     plt.xlabel("z")
     plt.ylabel(r"SFR ($M_\odot$ yr$^{-1}$)")
-    plt.legend(loc="lower left", ncol=4)
     plt.yscale('log')
     plt.ylim(ymin=1e-6)
-    plt.xlim(xmin=5.5)
-    plt.tight_layout()
-    plt.savefig("avg_sfr_reion")
+    plt.xlim(xmin=5.5, xmax=reds[0])
+    plt.legend(loc="lower left", ncol=4)
+    #plt.tight_layout()
+    plt.savefig("avg_sfr_reion.pdf")
 
 def get_avg_sfr_heii_reion(pig):
     """Get the averaged SFR for some different halo masses."""
@@ -225,8 +228,8 @@ def plot_avg_sfr_heii_reion(reds, outdir):
     plt.legend(loc="upper left")
     plt.yscale('log')
     plt.ylim(ymin=1e-5)
-    plt.tight_layout()
-    plt.savefig("avg_sfr_heii_reion")
+    #plt.tight_layout()
+    plt.savefig("avg_sfr_heii_reion.pdf")
 
 def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
@@ -279,14 +282,14 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
     fname = "hm-z-%.1f.txt" % zz
     if star:
         if metal:
-            fname = "starmetal-" + fname
+            fname = "data/starmetal-" + fname
         else:
-            fname = "starm-" + fname
+            fname = "data/starm-" + fname
     else:
         if metal:
-            fname = "gasmetal-" + fname
+            fname = "data/gasmetal-" + fname
         else:
-            fname = "gasm-" + fname
+            fname = "data/gasm-" + fname
     np.savetxt(fname, np.vstack((masses[ii], smhm_lower[ii], smhm_bin[ii], smhm_upper[ii])).T, header="# "+label+" (mass : SMHM (16, 50, 84))")
 
 def plot_smhms(reds, outdir, star=True, metal=False):
@@ -298,30 +301,30 @@ def plot_smhms(reds, outdir, star=True, metal=False):
     for ii in np.arange(len(reds)):
         plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
-    plt.tight_layout()
+    #plt.tight_layout()
     if star:
         if metal:
             plt.legend(loc="upper left")
             plt.ylabel(r"Z$_*$ (Z$_\odot$)")
             #plt.ylim(ymin=3e-4)
             plt.yscale('log')
-            plt.savefig("starmetal")
+            plt.savefig("starmetal.pdf")
         else:
             plt.legend(loc="upper left")
             plt.ylabel(r"$M_* / M_\mathrm{h} (\Omega_M / \Omega_b)$")
-            plt.savefig("smhms")
+            plt.savefig("smhms.pdf")
     else:
         if metal:
             plt.legend(loc="lower center")
             #plt.ylim(ymax=1.1)
             plt.yscale('log')
             plt.ylabel(r"Z$_\mathrm{g}$ (Z$_\odot$)")
-            plt.savefig("gasmetal")
+            plt.savefig("gasmetal.pdf")
         else:
             plt.ylabel(r"$M_g / M_\mathrm{h} (\Omega_M / \Omega_b)$")
             plt.legend(loc="lower center")
             plt.ylim(0.5, 1)
-            plt.savefig("gmhms")
+            plt.savefig("gmhms.pdf")
 
 def plot_reionization_history(outdir):
     """Reionization history as a function of redshift."""
@@ -332,8 +335,8 @@ def plot_reionization_history(outdir):
     plt.hist(zreion, 50, cumulative=True, density=True)
     plt.xlabel('z')
     plt.ylabel(r'$x_{hi}$')
-    plt.tight_layout()
-    plt.savefig("reion_hist")
+    #plt.tight_layout()
+    plt.savefig("reion_hist.pdf")
 
 def plot_zreion(outdir, zval=0):
     """Plot a slice of reionization redshifts"""
@@ -348,8 +351,8 @@ def plot_zreion(outdir, zval=0):
     plt.colorbar()
     plt.xlabel(r'x (Mpc/h)')
     plt.ylabel(r'y (Mpc/h)')
-    plt.tight_layout()
-    plt.savefig("reion_slice")
+    #plt.tight_layout()
+    plt.savefig("reion_slice.pdf")
 
 def modecount_rebin(kk, pk, modes, minmodes=20, ndesired=200):
     """Rebins a power spectrum so that there are sufficient modes in each bin"""
@@ -394,17 +397,19 @@ def plot_power(reds, outdir):
     """Plot some matter power spectra"""
     aa = 1/(1+reds)
     colors = ["black", "red", "blue", "brown", "pink", "orange"]
-    for a in aa:
+    for zz,cc in zip(reds, colors):
+        (kk, pk) = get_power(os.path.join(outdir, "../class-planck15/ics_matterpow_99.dat-%.1f" % zz), rebin=False)
+        plt.loglog(kk, pk, ls = "--")
+    for a,cc in zip(aa, colors):
         (kk, pk) = get_power(os.path.join(outdir, "powerspectrum-%.4f.txt" % a))
-        plt.loglog(kk, pk, label="z=%.1f" % (1/a-1))
-    for zz in reds:
-        (kk, pk) = get_power(os.path.join(outdir, "../class-planck15/ics_matterpow_99.dat-%.1f.txt" % zz), rebin=False)
-        plt.loglog(kk, pk, ls = "--", label="z=%d" % zz)
+        plt.loglog(kk, pk, label="z=%d" % (1/a-1))
     plt.legend()
     plt.ylabel(r"P(k) (Mpc/h)$^3$")
     plt.xlabel(r"k (h/Mpc)")
-    plt.tight_layout()
-    plt.savefig("matterpower")
+    plt.xlim(0.01, 200)
+    plt.ylim(1e-4, 1e3)
+    #plt.tight_layout()
+    plt.savefig("matterpower.pdf")
 
 if __name__ == "__main__":
     simdir = sys.argv[1]
