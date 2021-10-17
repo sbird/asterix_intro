@@ -8,7 +8,7 @@ import matplotlib.font_manager
 
 plt.rcParams['axes.linewidth'] = 1.8
 plt.rcParams["font.family"] = "serif"
-plt.rcParams['font.size'] = 13
+plt.rcParams['font.size'] = 16
 plt.rc('xtick', labelsize=14)
 plt.rc('ytick', labelsize=14)
 plt.rcParams['figure.constrained_layout.use'] = True
