@@ -180,11 +180,10 @@ def plot_avg_sfr_reion(reds, outdir):
 def get_avg_sfr_heii_reion(pig):
     """Get the averaged SFR for some different halo masses."""
     bf = BigFile(pig)
-
     fofmasses = bf['FOFGroups/Mass'][:]*1e10/bf["Header"].attrs["HubbleParam"]
     sfr = bf['FOFGroups/StarFormationRate'][:]
-    offsets = np.concatenate((np.zeros(1), np.cumsum(bf['FOFGroups/LengthByType'][:][:,0])))
-    massbins = np.array([4e9, 1e10, 1e11])
+    heiifrac = bf['FOFGroups/MassHeIonized'][:]/(1e-6+bf['FOFGroups/MassByType'][:][:,0])
+    massbins = np.array([5e9, 1e10, 5e10])
     avgsfr_reion = np.zeros((len(massbins),3))
     avgsfr_no_reion = np.zeros((len(massbins),3))
     for i, mm in enumerate(massbins):
@@ -193,14 +192,12 @@ def get_avg_sfr_heii_reion(pig):
             print("no halos for mass %g pig %s" % (mm, pig))
             continue
         print("mass %.1f : %d" % (mm, np.size(ii)))
-        heiifrac = np.array([np.mean(bf['0/HeIIIIonized'][int(offsets[i]):int(offsets[i]+10)]) for i in ii[0]])
-        jj = np.where(heiifrac > 0.9)
+        jj = np.where(heiifrac[ii] > 0.6)
         if np.size(jj) > 0:
             avgsfr_reion[i] = np.percentile(sfr[ii][jj], [16, 50, 84])
-        jj = np.where(heiifrac < 0.1)
+        jj = np.where(heiifrac[ii] < 0.4)
         if np.size(jj) > 0:
             avgsfr_no_reion[i] = np.percentile(sfr[ii][jj], [16, 50, 84])
-    del offsets
     del sfr
     del fofmasses
     return avgsfr_reion, avgsfr_no_reion
@@ -209,9 +206,10 @@ def plot_avg_sfr_heii_reion(reds, outdir):
     """Average SFR over time"""
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
-    colors_reion = ["darkred", "blue", "brown", "green"]
+    colors_reion = ["darkred", "navy", "brown", "black"]
     colors_no_reion = ["red", "blue", "orange", "grey"]
     labels = [r"$5\times 10^{9}$", r"$10^{10}$", r"$5\times 10^{10}$"]
+    #labels = [r"$2\times 10^{9}$", r"$5\times 10^{9}$", r"$10^{10}$", r"$5\times 10^{10}$"]
     sfrs_reion, sfrs_no_reion = zip(*[get_avg_sfr_heii_reion(pig) for pig in pigs])
     sfrs_reion = np.array(sfrs_reion)
     sfrs_no_reion = np.array(sfrs_no_reion)
@@ -219,17 +217,18 @@ def plot_avg_sfr_heii_reion(reds, outdir):
         j = np.where(sfrs_reion[:,i,2] > 0)
         plt.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], color=colors_reion[i], alpha=0.2)
         j = np.where(sfrs_reion[:,i,1] > 0)
-        plt.plot(reds[j], sfrs_reion[j[0],i,1], label=labels[i]+" reion", color=colors_reion[i], ls="-")
+        plt.plot(reds[j], sfrs_reion[j[0],i,1], label="HeIII: "+labels[i], color=colors_reion[i], ls="-")
         j = np.where(sfrs_no_reion[:,i,2] > 0)
         plt.fill_between(reds[j], sfrs_no_reion[j[0],i,0]+1e-14, sfrs_no_reion[j[0],i,2], color=colors_no_reion[i], alpha=0.2)
         j = np.where(sfrs_no_reion[:,i,1] > 0)
-        plt.plot(reds[j], sfrs_no_reion[j[0],i,1], label=labels[i]+" no reion", color=colors_no_reion[i], ls="--")
+        plt.plot(reds[j], sfrs_no_reion[j[0],i,1], label="HeII: "+labels[i], color=colors_no_reion[i], ls="--")
         #np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
     plt.xlabel("z")
     plt.ylabel(r"SFR ($M_\odot$ yr$^{-1}$)")
     plt.legend(loc="upper left")
-    plt.yscale('log')
-    plt.ylim(ymin=1e-5)
+    #plt.yscale('log')
+    #plt.ylim(ymin=1e-6, ymax=2)
+    plt.xlim(xmin=3, xmax=4)
     #plt.tight_layout()
     plt.savefig("avg_sfr_heii_reion.pdf")
 
