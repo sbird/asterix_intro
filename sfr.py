@@ -232,7 +232,7 @@ def plot_avg_sfr_heii_reion(reds, outdir):
     #plt.tight_layout()
     plt.savefig("avg_sfr_heii_reion.pdf")
 
-def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
+def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
     bf = BigFile(pig)
     hh = bf["Header"].attrs["HubbleParam"]
@@ -272,7 +272,7 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
         factor = omega0 / omegab
     for i in np.arange(np.size(massbins)-1):
         ii = np.where((fofmasses > massbins[i])*(fofmasses < massbins[i+1]))
-        if np.size(ii) == 0:
+        if np.size(ii) < 10:
             continue
         smhm_bin[i] = np.median(smhm[ii]) * factor
         smhm_lower[i] = np.percentile(smhm[ii], 16) * factor
@@ -280,7 +280,8 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
     masses = np.exp((np.log(massbins[1:]) + np.log(massbins[:-1]))/2.)
     ii = np.where(smhm_bin > 0)
     plt.semilogx(masses[ii], smhm_bin[ii], color=color, label=label, ls=ls)
-    plt.fill_between(masses[ii], smhm_lower[ii], smhm_upper[ii], color=color, alpha=0.3)
+    if scatter:
+        plt.fill_between(masses[ii], smhm_lower[ii], smhm_upper[ii], color=color, alpha=0.3)
     fname = "hm-z-%.1f.txt" % zz
     if star:
         if metal:
@@ -298,10 +299,10 @@ def plot_smhms(reds, outdir, star=True, metal=False):
     """Plot several SMHM over time."""
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
-    colors = ["black", "red", "blue", "brown", "pink", "orange"]
+    colors = ["black", "red", "blue", "brown", "grey", "orange"]
     lss = ["-", "-.", "--", ":"]
     for ii in np.arange(len(reds)):
-        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal)
+        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1))
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
     #plt.tight_layout()
     if star:
