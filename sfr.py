@@ -42,7 +42,7 @@ def plot_ssfr(reds, outdir):
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "green"]
     lss = ["-", "--", ":", "-."]
-    labels = [r"$4\times 10^6$", r"$10^7$", r"$10^8$", r"$10^{9}$", r"$10^{10}$"]
+    labels = [r"$M_* = 4\times 10^6 M_\odot$", r"$M_* = 10^7 M_\odot$", r"$M_* = 10^8 M_\odot$", r"$M_* = 10^{9} M_\odot$", r"$M_* = 10^{10} M_\odot$"]
     #labels = [r"$10^7$", r"$10^8$", r"$10^{9}$"]
     ssfrs = np.array([get_ssfr(pig) for pig in pigs])
     for i in range(np.shape(ssfrs)[1]):
@@ -262,7 +262,7 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
     else:
         smhm = stellarmasses/fofmasses
         del stellarmasses
-    label = "z=%.1f" % zz
+    label = "z=%d" % zz
     massbins = np.logspace(9, 14, 50)
     smhm_bin = np.zeros(np.size(massbins)-1)
     smhm_lower = np.zeros(np.size(massbins)-1)
@@ -316,6 +316,7 @@ def plot_smhms(reds, outdir, star=True, metal=False):
             plt.legend(loc="upper left")
             plt.yscale('log')
             plt.ylabel(r"$M_* / M_\mathrm{h} (\Omega_M / \Omega_b)$")
+            plt.ylim(ymin=5e-4)
             plt.savefig("smhms.pdf")
     else:
         if metal:
