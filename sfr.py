@@ -331,6 +331,119 @@ def plot_smhms(reds, outdir, star=True, metal=False):
             plt.ylim(0.5, 1)
             plt.savefig("gmhms.pdf")
 
+def plot_smhm_he_reion(pig, color=None, ls=None, star=True, metal=False, scatter=True):
+    """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
+    bf = BigFile(pig)
+    hh = bf["Header"].attrs["HubbleParam"]
+    fofmasses = bf['FOFGroups/Mass'][:]*1e10/hh
+    if star:
+        if metal:
+            metals = bf["FOFGroups/StellarMetalMass"][:]
+            starmass = bf['FOFGroups/MassByType'][:][:,4]
+        else:
+            stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
+    else:
+        if metal:
+            metals = bf["FOFGroups/GasMetalMass"][:]
+            starmass = bf['FOFGroups/MassByType'][:][:,0]
+        else:
+            stellarmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
+    omega0 = bf["Header"].attrs["Omega0"]
+    omegab = bf["Header"].attrs["OmegaBaryon"]
+    zz = 1/bf["Header"].attrs["Time"]-1
+    heiifrac = bf['FOFGroups/MassHeIonized'][:]/(1e-6+bf['FOFGroups/MassByType'][:][:,0])
+    if metal:
+        ii = np.where(starmass > 0)
+        smhm = metals[ii]/starmass[ii]
+        fofmasses = fofmasses[ii]
+        heiifrac = heiifrac[ii]
+        del starmass
+        del metals
+    else:
+        smhm = stellarmasses/fofmasses
+        del stellarmasses
+    label = "z=%d" % zz
+    massbins = np.logspace(9, 14, 50)
+    smhm_bin = np.zeros(np.size(massbins)-1)
+    smhm_lower = np.zeros(np.size(massbins)-1)
+    smhm_upper = np.zeros(np.size(massbins)-1)
+    if metal:
+        factor = 1/0.0122
+    else:
+        factor = omega0 / omegab
+    for i in np.arange(np.size(massbins)-1):
+        ii = np.where((fofmasses > massbins[i])*(fofmasses < massbins[i+1]))
+        if np.size(ii) < 10:
+            continue
+        jj = np.where(heiifrac < 0.4)
+        smhm_bin[i] = np.median(smhm[ii][jj]) * factor
+        smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
+        smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
+    masses = np.exp((np.log(massbins[1:]) + np.log(massbins[:-1]))/2.)
+    ii = np.where(smhm_bin > 0)
+    plt.semilogx(masses[ii], smhm_bin[ii], color=color, label="HeII: "+label, ls="--")
+    for i in np.arange(np.size(massbins)-1):
+        ii = np.where((fofmasses > massbins[i])*(fofmasses < massbins[i+1]))
+        if np.size(ii) < 10:
+            continue
+        jj = np.where(heiifrac > 0.6)
+        smhm_bin[i] = np.median(smhm[ii][jj]) * factor
+        smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
+        smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
+    masses = np.exp((np.log(massbins[1:]) + np.log(massbins[:-1]))/2.)
+    ii = np.where(smhm_bin > 0)
+    plt.semilogx(masses[ii], smhm_bin[ii], color=color, label="HeIII: "+label, ls="-")
+    #if scatter:
+        #plt.fill_between(masses[ii], smhm_lower[ii], smhm_upper[ii], color=color, alpha=0.3)
+    fname = "hm-z-%.1f.txt" % zz
+    if star:
+        if metal:
+            fname = "data/starmetal-" + fname
+        else:
+            fname = "data/starm-" + fname
+    else:
+        if metal:
+            fname = "data/gasmetal-" + fname
+        else:
+            fname = "data/gasm-" + fname
+    #np.savetxt(fname, np.vstack((masses[ii], smhm_lower[ii], smhm_bin[ii], smhm_upper[ii])).T, header="# "+label+" (mass : SMHM (16, 50, 84))")
+
+def plot_smhms_he_reion(reds, outdir, star=True, metal=False):
+    """Plot several SMHM over time."""
+    snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
+    pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
+    colors = ["black", "red", "blue", "brown", "grey", "orange"]
+    lss = ["-", "-.", "--", ":"]
+    for ii in np.arange(len(reds)):
+        plot_smhm_he_reion(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1))
+    plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
+    #plt.tight_layout()
+    if star:
+        if metal:
+            plt.legend(loc="upper left")
+            plt.ylabel(r"Z$_*$ (Z$_\odot$)")
+            #plt.ylim(ymin=3e-4)
+            plt.yscale('log')
+            plt.savefig("starmetal_he_reion.pdf")
+        else:
+            plt.legend(loc="upper left")
+            plt.yscale('log')
+            plt.ylabel(r"$M_* / M_\mathrm{h} (\Omega_M / \Omega_b)$")
+            plt.ylim(ymin=5e-4)
+            plt.savefig("smhms_he_reion.pdf")
+    else:
+        if metal:
+            plt.legend(loc="lower center")
+            #plt.ylim(ymax=1.1)
+            plt.yscale('log')
+            plt.ylabel(r"Z$_\mathrm{g}$ (Z$_\odot$)")
+            plt.savefig("gasmetal_he_reion.pdf")
+        else:
+            plt.ylabel(r"$M_g / M_\mathrm{h} (\Omega_M / \Omega_b)$")
+            plt.legend(loc="lower center")
+            plt.ylim(0.5, 1)
+            plt.savefig("gmhms_he_reion.pdf")
+
 def plot_reionization_history(outdir):
     """Reionization history as a function of redshift."""
     bf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
@@ -440,6 +553,15 @@ if __name__ == "__main__":
     plot_smhms(reds2, outdir=simdir)
     plt.clf()
     plot_smhms(reds2, outdir=simdir, star=False)
+    plt.clf()
+    reds2 = np.array([4, 3])
+    plot_smhms_he_reion(reds2, outdir=simdir, metal=True)
+    plt.clf()
+    plot_smhms_he_reion(reds2, outdir=simdir, star=False, metal=True)
+    plt.clf()
+    plot_smhms_he_reion(reds2, outdir=simdir)
+    plt.clf()
+    plot_smhms_he_reion(reds2, outdir=simdir, star=False)
     plt.clf()
 
     plot_reionization_history(outdir=simdir)
