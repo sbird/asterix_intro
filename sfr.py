@@ -375,7 +375,7 @@ def plot_smhm_he_reion(pig, color=None, ls=None, star=True, metal=False, scatter
         ii = np.where((fofmasses > massbins[i])*(fofmasses < massbins[i+1]))
         if np.size(ii) < 10:
             continue
-        jj = np.where(heiifrac < 0.4)
+        jj = np.where(heiifrac[ii] < 0.4)
         smhm_bin[i] = np.median(smhm[ii][jj]) * factor
         smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
         smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
@@ -386,7 +386,7 @@ def plot_smhm_he_reion(pig, color=None, ls=None, star=True, metal=False, scatter
         ii = np.where((fofmasses > massbins[i])*(fofmasses < massbins[i+1]))
         if np.size(ii) < 10:
             continue
-        jj = np.where(heiifrac > 0.6)
+        jj = np.where(heiifrac[ii] > 0.6)
         smhm_bin[i] = np.median(smhm[ii][jj]) * factor
         smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
         smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
