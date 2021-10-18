@@ -24,7 +24,7 @@ def get_ssfr(pig):
     """Get the specific SFR (SFR per unit stellar mass) for some different stellar masses."""
     bf = BigFile(pig)
     sfr = bf['FOFGroups/StarFormationRate'][:]
-    stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10
+    stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10/bf["Header"].attrs["HubbleParam"]
     massbins = np.array([4e6, 1e7, 1e8, 1e9, 1e10])
     #massbins = np.array([1e7, 1e8, 1e9])
     avgssfr = np.zeros((np.size(massbins),3))
@@ -236,19 +236,20 @@ def plot_avg_sfr_heii_reion(reds, outdir):
 def plot_smhm(pig, color=None, ls=None, star=True, metal=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
     bf = BigFile(pig)
-    fofmasses = bf['FOFGroups/Mass'][:]*1e10
+    hh = bf["Header"].attrs["HubbleParam"]
+    fofmasses = bf['FOFGroups/Mass'][:]*1e10/hh
     if star:
         if metal:
             metals = bf["FOFGroups/StellarMetalMass"][:]
             starmass = bf['FOFGroups/MassByType'][:][:,4]
         else:
-            stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10
+            stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
     else:
         if metal:
             metals = bf["FOFGroups/GasMetalMass"][:]
             starmass = bf['FOFGroups/MassByType'][:][:,0]
         else:
-            stellarmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10
+            stellarmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
     omega0 = bf["Header"].attrs["Omega0"]
     omegab = bf["Header"].attrs["OmegaBaryon"]
     zz = 1/bf["Header"].attrs["Time"]-1
@@ -313,6 +314,7 @@ def plot_smhms(reds, outdir, star=True, metal=False):
             plt.savefig("starmetal.pdf")
         else:
             plt.legend(loc="upper left")
+            plt.yscale('log')
             plt.ylabel(r"$M_* / M_\mathrm{h} (\Omega_M / \Omega_b)$")
             plt.savefig("smhms.pdf")
     else:
