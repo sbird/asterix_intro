@@ -493,26 +493,26 @@ def plot_smhm_reion(pig, color=None, ls=None, zreion=None, nmesh=0, star=True, m
             continue
         zpos = fofpos[ii] / box * nmesh
         fofzreion = np.array([zreion[int(zp[0]), int(zp[1]), int(zp[2])] for zp in zpos])
-        jj = np.where(fofzreion < zz)
+        jj = np.where(fofzreion < 7.5)
         smhm_bin[i] = np.median(smhm[ii][jj]) * factor
-        smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
-        smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
+        #smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
+        #smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
     masses = np.exp((np.log(massbins[1:]) + np.log(massbins[:-1]))/2.)
     ii = np.where(smhm_bin > 0)
-    plt.semilogx(masses[ii], smhm_bin[ii], color=color, label="HeII: "+label, ls="--")
+    plt.semilogx(masses[ii], smhm_bin[ii], color=color, label=r"$z_{re} < 7.5$ "+label, ls="--")
     for i in np.arange(np.size(massbins)-1):
         ii = np.where((fofmasses > massbins[i])*(fofmasses < massbins[i+1]))
         if np.size(ii) < 10:
             continue
         zpos = fofpos[ii] / box * nmesh
         fofzreion = np.array([zreion[int(zp[0]), int(zp[1]), int(zp[2])] for zp in zpos])
-        jj = np.where(fofzreion > zz)
+        jj = np.where(fofzreion > 7.5)
         smhm_bin[i] = np.median(smhm[ii][jj]) * factor
-        smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
-        smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
+        #smhm_lower[i] = np.percentile(smhm[ii][jj], 16) * factor
+        #smhm_upper[i] = np.percentile(smhm[ii][jj], 84) * factor
     masses = np.exp((np.log(massbins[1:]) + np.log(massbins[:-1]))/2.)
     ii = np.where(smhm_bin > 0)
-    plt.semilogx(masses[ii], smhm_bin[ii], color=color, label="HeIII: "+label, ls="-")
+    plt.semilogx(masses[ii], smhm_bin[ii], color=color, label=r"$z_{re} > 7.5$ "+label, ls="-")
     #if scatter:
         #plt.fill_between(masses[ii], smhm_lower[ii], smhm_upper[ii], color=color, alpha=0.3)
     fname = "hm-z-%.1f.txt" % zz
@@ -565,7 +565,7 @@ def plot_smhms_reion(reds, outdir, star=True, metal=False):
             plt.savefig("gasmetal_reion.pdf")
         else:
             plt.ylabel(r"$M_g / M_\mathrm{h} (\Omega_M / \Omega_b)$")
-            plt.legend(loc="lower center")
+            plt.legend(loc="lower center", ncol=2)
             plt.ylim(0.5, 1)
             plt.savefig("gmhms_reion.pdf")
 
