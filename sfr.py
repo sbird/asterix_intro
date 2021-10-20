@@ -239,14 +239,15 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
     fofmasses = bf['FOFGroups/Mass'][:]*1e10/hh
     if star:
         if metal:
-            metals = bf["FOFGroups/StellarMetalMass"][:]
-            starmass = bf['FOFGroups/MassByType'][:][:,4]
+            metals = bf["FOFGroups/StellarMetalElemMass"][:]*1e10/hh
+            #metals = bf["FOFGroups/StellarMetalMass"][:]*1e10/hh
+            starmass = bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
         else:
             stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
     else:
         if metal:
-            metals = bf["FOFGroups/GasMetalMass"][:]
-            starmass = bf['FOFGroups/MassByType'][:][:,0]
+            metals = bf["FOFGroups/GasMetalElemMass"][:]*1e10/hh
+            starmass = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
         else:
             stellarmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
     omega0 = bf["Header"].attrs["Omega0"]
@@ -254,20 +255,27 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
     zz = 1/bf["Header"].attrs["Time"]-1
     if metal:
         ii = np.where(starmass > 0)
-        smhm = metals[ii]/starmass[ii]
-        fofmasses = fofmasses[ii]
+        oxy = metals[:,4]
+        smhm = 12 + np.log10(1e-10 + oxy[ii]/(starmass[ii]*0.76)/16.)
+        #smhm = metals[ii]/starmass[ii]
+        fofmasses = starmass[ii]
+        del oxy
         del starmass
         del metals
     else:
         smhm = stellarmasses/fofmasses
         del stellarmasses
     label = "z=%d" % zz
-    massbins = np.logspace(9, 14, 50)
+    if metal:
+        massbins = np.logspace(7, 12, 50)
+    else:
+        massbins = np.logspace(9, 14, 50)
     smhm_bin = np.zeros(np.size(massbins)-1)
     smhm_lower = np.zeros(np.size(massbins)-1)
     smhm_upper = np.zeros(np.size(massbins)-1)
     if metal:
-        factor = 1/0.0122
+        factor = 1
+        #factor = 1/0.0142
     else:
         factor = omega0 / omegab
     for i in np.arange(np.size(massbins)-1):
@@ -301,6 +309,17 @@ def plot_smhms(reds, outdir, star=True, metal=False):
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "grey", "orange"]
     lss = ["-", "-.", "--", ":"]
+    if star and metal:
+        #FIt from table 3 of https://arxiv.org/pdf/2009.07292.pdf
+        m10 = np.logspace(9, 10.5, 50)
+        #zobs = 0.29 * np.log10(m10/1e10) + 8.41
+        zupper = 0.31 * np.log10(m10/1e10) + 8.44
+        zlower = 0.27 * np.log10(m10/1e10) + 8.38
+        ii = np.where(m10 < 1e10)
+        zlower[ii] = 0.31 * np.log10(m10[ii]/1e10) + 8.38
+        zupper[ii] = 0.27 * np.log10(m10[ii]/1e10) + 8.44
+        #plt.plot(m10, zobs, ls="-",color="blue")
+        plt.fill_between(m10, zupper, zlower, color="green", alpha=0.2, label="Sanders+21")
     for ii in np.arange(len(reds)):
         plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1))
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
@@ -308,10 +327,12 @@ def plot_smhms(reds, outdir, star=True, metal=False):
     if star:
         if metal:
             plt.legend(loc="upper left")
-            plt.ylabel(r"Z$_*$ (Z$_\odot$)")
+            #plt.ylabel(r"Z$_*$ (Z$_\odot$)")
+            plt.ylabel(r"$12 + \log_{10}(O/H)$")
+            plt.xlabel(r"$M_\mathrm{*} (M_\odot)$")
             #plt.ylim(ymin=3e-4)
-            plt.yscale('log')
-            plt.savefig("starmetal.pdf")
+            #plt.yscale('log')
+            plt.savefig("starmetal_oh.pdf")
         else:
             plt.legend(loc="upper left")
             plt.yscale('log')
@@ -322,9 +343,11 @@ def plot_smhms(reds, outdir, star=True, metal=False):
         if metal:
             plt.legend(loc="lower center")
             #plt.ylim(ymax=1.1)
-            plt.yscale('log')
-            plt.ylabel(r"Z$_\mathrm{g}$ (Z$_\odot$)")
-            plt.savefig("gasmetal.pdf")
+            #plt.yscale('log')
+            plt.ylabel(r"$12 + \log_{10}(O/H)$")
+            #plt.ylabel(r"Z$_\mathrm{g}$ (Z$_\odot$)")
+            plt.xlabel(r"$M_\mathrm{*} (M_\odot)$")
+            plt.savefig("gasmetal_oh.pdf")
         else:
             plt.ylabel(r"$M_g / M_\mathrm{h} (\Omega_M / \Omega_b)$")
             plt.legend(loc="lower center")
