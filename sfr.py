@@ -43,6 +43,21 @@ def plot_ssfr(reds, outdir):
     colors = ["black", "red", "blue", "brown", "green"]
     lss = ["-", "--", ":", "-."]
     labels = [r"$M_* = 4\times 10^6 M_\odot$", r"$M_* = 10^7 M_\odot$", r"$M_* = 10^8 M_\odot$", r"$M_* = 10^{9} M_\odot$", r"$M_* = 10^{10} M_\odot$"]
+
+    #From arxiv.org/abs/1407.6012 table 3.
+    zz = np.array([4,5,6])
+    #1e9:
+    logsfr9 = np.array([0.71, 0.88, 0.92])
+    #Monte Carlo sigma
+    sigma9 = np.array([0.26, 0.25, 0.43])
+    yerr9 = (10**logsfr9/1e9 - 10**(logsfr9 - sigma9)/1e9, 10**(logsfr9 + sigma9)/1e9 - 10**logsfr9/1e9)
+    plt.errorbar(zz, 10**logsfr9/1e9, yerr=yerr9, fmt='^',color='black',ms=5, label="Salmon+14 $10^9$")
+    #1e10:
+    #logsfr10 = np.array([1.35, 1.46, 1.47])
+    #sigma10 = np.array([0.27, 0.27, 0.27])
+    #yerr10 = (10**logsfr10/1e10 - 10**(logsfr10 - sigma10)/1e10, 10**(logsfr10 + sigma10)/1e10 - 10**logsfr10/1e10)
+    #plt.errorbar(zz, 10**logsfr10/1e10, yerr=yerr10, fmt='^',color='black',ms=5, label="Salmon+14 $10^9$")
+
     #labels = [r"$10^7$", r"$10^8$", r"$10^{9}$"]
     ssfrs = np.array([get_ssfr(pig) for pig in pigs])
     for i in range(np.shape(ssfrs)[1]):
@@ -56,7 +71,7 @@ def plot_ssfr(reds, outdir):
     plt.xlabel("z")
     plt.ylabel(r"sSFR (yr$^{-1}$)")
     plt.legend(loc="lower right")
-    plt.yscale('log')
+    #plt.yscale('log')
     plt.ylim(1e-9,4e-8)
     #plt.tight_layout()
     plt.savefig("ssfr.pdf")
