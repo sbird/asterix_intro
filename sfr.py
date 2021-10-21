@@ -71,9 +71,9 @@ def plot_ssfr(reds, outdir):
         np.savetxt("data/ssfr-mstar%d.txt" % i, np.vstack((reds[j], ssfrs[j[0],i,:].T)).T, header="# M* = "+labels[i]+" (redshift : sSFR 16, 50, 84 percentiles)")
     plt.xlabel("z")
     plt.ylabel(r"sSFR (yr$^{-1}$)")
-    plt.legend(loc="lower right")
+    plt.legend(loc="upper left")
     #plt.yscale('log')
-    plt.ylim(1e-9,4e-8)
+    plt.ylim(1e-9,3e-8)
     #plt.tight_layout()
     plt.savefig("ssfr.pdf")
 
