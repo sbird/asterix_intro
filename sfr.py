@@ -351,12 +351,8 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True, hd
 
 def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
     """Plot several SMHM over time."""
-    if hdf5:
-        snaps = [25, ]
-        pigs = [os.path.join(outdir, "fof_subhalo_tab_%03d.*.hdf5") % ss for ss in snaps]
-    else:
-        snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
-        pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
+    snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
+    pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "grey", "orange"]
     lss = ["-", "-.", "--", ":"]
     if star and metal:
@@ -372,6 +368,10 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
         plt.fill_between(m10, zupper, zlower, color="green", alpha=0.2, label="Sanders+21")
     for ii in np.arange(len(reds)):
         plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1), hdf5=hdf5)
+    if hdf5:
+        snaps = [25, ]
+        pigs = [os.path.join(outdir, "fof_subhalo_tab_%03d.*.hdf5") % ss for ss in snaps]
+        plot_smhm(pigs[0], color="black", ls=":", star=star, metal=False, scatter=False, hdf5=hdf5)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
     #plt.tight_layout()
     if star:
@@ -742,14 +742,14 @@ if __name__ == "__main__":
     plt.clf()
     plot_power(np.array([10, 8, 6.12, 4, 3]), outdir=simdir)
     plt.clf()
-    reds2 = np.array([12, 10, 8, 6, 4, 3])
+    reds2 = np.array([8, 6, 4, 3])
     plot_smhms(reds2, outdir=simdir, metal=True)
     plt.clf()
     plot_smhms(reds2, outdir=simdir, star=False, metal=True)
     plt.clf()
     plot_smhms(reds2, outdir=simdir)
     plt.clf()
-    plot_smhms(reds2, outdir=simdir, star=False)
+    plot_smhms(reds2, outdir=simdir, star=False, hdf5=True)
     plt.clf()
     reds2 = np.array([4, 3])
     plot_smhms_he_reion(reds2, outdir=simdir, metal=True)
