@@ -247,27 +247,28 @@ def plot_avg_sfr_heii_reion(reds, outdir):
     #plt.tight_layout()
     plt.savefig("avg_sfr_heii_reion.pdf")
 
-def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
-    """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
+def load_bigfile_data(pig, metal=False, star=True):
+    """Load the stellar mass data from a bigfile."""
     bf = BigFile(pig)
     hh = bf["Header"].attrs["HubbleParam"]
     fofmasses = bf['FOFGroups/Mass'][:]*1e10/hh
+    metals = None
     if star:
+        starmass = bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
         if metal:
             metals = bf["FOFGroups/StellarMetalElemMass"][:]*1e10/hh
-            #metals = bf["FOFGroups/StellarMetalMass"][:]*1e10/hh
-            starmass = bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
-        else:
-            stellarmasses = bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
     else:
+        starmass = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
         if metal:
             metals = bf["FOFGroups/GasMetalElemMass"][:]*1e10/hh
-            starmass = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
-        else:
-            stellarmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
     omega0 = bf["Header"].attrs["Omega0"]
     omegab = bf["Header"].attrs["OmegaBaryon"]
     zz = 1/bf["Header"].attrs["Time"]-1
+    return (omega0, omegab, zz, metals, starmass, fofmasses)
+
+def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
+    """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
+    (omega0, omegab, zz, metals, starmass, fofmasses) = load_bigfile_data(pig, metal=metal, star=star)
     if metal:
         ii = np.where(starmass > 0)
         oxy = metals[:,4]
@@ -275,11 +276,10 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
         #smhm = metals[ii]/starmass[ii]
         fofmasses = starmass[ii]
         del oxy
-        del starmass
         del metals
     else:
-        smhm = stellarmasses/fofmasses
-        del stellarmasses
+        smhm = starmass/fofmasses
+    del starmass
     label = "z=%d" % zz
     if metal:
         massbins = np.logspace(7, 12, 50)
