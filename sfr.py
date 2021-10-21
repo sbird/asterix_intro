@@ -370,7 +370,7 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
         plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1), hdf5=hdf5)
     if hdf5:
         snaps = [25, ]
-        pigs = [os.path.join(outdir, "fof_subhalo_tab_%03d.*.hdf5") % ss for ss in snaps]
+        pigs = ["/work/04808/tg841079/frontera/tng_fof/tng_fof_%03d/fof_subhalo_tab_%03d.*.hdf5" % ss for ss in snaps]
         plot_smhm(pigs[0], color="black", ls=":", star=star, metal=False, scatter=False, hdf5=hdf5)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
     #plt.tight_layout()
