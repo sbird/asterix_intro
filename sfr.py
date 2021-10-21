@@ -1,10 +1,11 @@
 """Make some plots for the asterix paper."""
 import os
+import glob
 import sys
 import numpy as np
+import h5py
 import matplotlib.pyplot as plt
 from bigfile import BigFile
-import matplotlib.font_manager
 
 plt.rcParams['axes.linewidth'] = 1.8
 plt.rcParams["font.family"] = "serif"
@@ -266,9 +267,39 @@ def load_bigfile_data(pig, metal=False, star=True):
     zz = 1/bf["Header"].attrs["Time"]-1
     return (omega0, omegab, zz, metals, starmass, fofmasses)
 
-def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
+def load_h5py_data(fofpattern, metal=False, star=True):
+    """Load the stellar mass data from a bigfile."""
+    if metal:
+        raise NotImplementedError("Metal loading not supported")
+    pigs = glob.glob(fofpattern)
+    bf = h5py.File(pigs[0])
+    hh = bf["Header"].attrs["HubbleParam"]
+    omega0 = bf["Header"].attrs["Omega0"]
+    omegab = bf["Header"].attrs["OmegaBaryon"]
+    zz = 1/bf["Header"].attrs["Time"]-1
+    metals = None
+    fofmasses = bf['Group']['GroupMass'][:]*1e10/hh
+    if star:
+        starmass = bf['Group']['GroupMassType'][:,4]*1e10/hh
+    else:
+        starmass = bf['Group']['GroupMassType'][:,0]*1e10/hh
+    for pig in pigs[1:]:
+        bf = h5py.File(pig)
+        fm = bf['Group']['GroupMass'][:]*1e10/hh
+        if star:
+            sm = bf['Group']['GroupMassType'][:,4]*1e10/hh
+        else:
+            sm = bf['Group']['GroupMassType'][:,0]*1e10/hh
+        fofmasses = np.concatenate([fofmasses, fm])
+        starmass = np.concatenate([starmass, sm])
+    return (omega0, omegab, zz, metals, starmass, fofmasses)
+
+def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True, hdf5=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
-    (omega0, omegab, zz, metals, starmass, fofmasses) = load_bigfile_data(pig, metal=metal, star=star)
+    if hdf5:
+        (omega0, omegab, zz, metals, starmass, fofmasses) = load_h5py_data(pig, metal=metal, star=star)
+    else:
+        (omega0, omegab, zz, metals, starmass, fofmasses) = load_bigfile_data(pig, metal=metal, star=star)
     if metal:
         ii = np.where(starmass > 0)
         oxy = metals[:,4]
@@ -318,10 +349,14 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True):
             fname = "data/gasm-" + fname
     np.savetxt(fname, np.vstack((masses[ii], smhm_lower[ii], smhm_bin[ii], smhm_upper[ii])).T, header="# "+label+" (mass : SMHM (16, 50, 84))")
 
-def plot_smhms(reds, outdir, star=True, metal=False):
+def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
     """Plot several SMHM over time."""
-    snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
-    pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
+    if hdf5:
+        snaps = [25, ]
+        pigs = [os.path.join(outdir, "fof_subhalo_tab_%03d.*.hdf5") % ss for ss in snaps]
+    else:
+        snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
+        pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "grey", "orange"]
     lss = ["-", "-.", "--", ":"]
     if star and metal:
@@ -336,7 +371,7 @@ def plot_smhms(reds, outdir, star=True, metal=False):
         #plt.plot(m10, zobs, ls="-",color="blue")
         plt.fill_between(m10, zupper, zlower, color="green", alpha=0.2, label="Sanders+21")
     for ii in np.arange(len(reds)):
-        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1))
+        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1), hdf5=hdf5)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
     #plt.tight_layout()
     if star:
