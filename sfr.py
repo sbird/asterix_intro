@@ -404,7 +404,7 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
             plt.ylim(0.5, 1)
             plt.savefig("gmhms.pdf")
 
-def plot_smhm_he_reion(pig, color=None, ls=None, star=True, metal=False, scatter=True):
+def plot_smhm_he_reion(pig, color=None, star=True, metal=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
     bf = BigFile(pig)
     hh = bf["Header"].attrs["HubbleParam"]
@@ -486,9 +486,8 @@ def plot_smhms_he_reion(reds, outdir, star=True, metal=False):
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["black", "red", "blue", "brown", "grey", "orange"]
-    lss = ["-", "-.", "--", ":"]
     for ii in np.arange(len(reds)):
-        plot_smhm_he_reion(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1))
+        plot_smhm_he_reion(pigs[ii], color=colors[ii], star=star, metal=metal)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
     #plt.tight_layout()
     if star:
@@ -554,8 +553,8 @@ def plot_smhm_reion(pig, color=None, ls=None, zreion=None, nmesh=0, star=True, m
     label = "z=%d" % zz
     massbins = np.logspace(9, 14, 50)
     smhm_bin = np.zeros(np.size(massbins)-1)
-    smhm_lower = np.zeros(np.size(massbins)-1)
-    smhm_upper = np.zeros(np.size(massbins)-1)
+    #smhm_lower = np.zeros(np.size(massbins)-1)
+    #smhm_upper = np.zeros(np.size(massbins)-1)
     if metal:
         factor = 1/0.0122
     else:
