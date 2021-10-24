@@ -275,7 +275,8 @@ def load_h5py_data(fofpattern, metal=False, star=True):
     bf = h5py.File(pigs[0])
     hh = bf["Header"].attrs["HubbleParam"]
     omega0 = bf["Header"].attrs["Omega0"]
-    omegab = bf["Header"].attrs["OmegaBaryon"]
+    xb = 0.186667
+    omegab = omega0 * (xb / (xb + 1))
     zz = 1/bf["Header"].attrs["Time"]-1
     metals = None
     fofmasses = bf['Group']['GroupMass'][:]*1e10/hh
@@ -311,7 +312,10 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True, hd
     else:
         smhm = starmass/fofmasses
     del starmass
-    label = "z=%d" % zz
+    if hdf5:
+        label= "TNG z=%d" % zz
+    else:
+        label = "z=%.0f" % zz
     if metal:
         massbins = np.logspace(7, 12, 50)
     else:
@@ -353,8 +357,8 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
     """Plot several SMHM over time."""
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
-    colors = ["black", "red", "blue", "brown", "grey", "orange"]
-    lss = ["-", "-.", "--", ":"]
+    colors = ["red", "blue", "brown", "black", "grey"]
+    lss = [":", "-.", "--", "-"]
     if star and metal:
         #FIt from table 3 of https://arxiv.org/pdf/2009.07292.pdf
         m10 = np.logspace(9, 10.5, 50)
@@ -367,11 +371,13 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
         #plt.plot(m10, zobs, ls="-",color="blue")
         plt.fill_between(m10, zupper, zlower, color="green", alpha=0.2, label="Sanders+21")
     for ii in np.arange(len(reds)):
-        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % 4], star=star, metal=metal, scatter=(ii ==len(reds)-1), hdf5=hdf5)
+        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % len(lss)], star=star, metal=metal, scatter=(ii ==len(reds)-1), hdf5=False)
     if hdf5:
-        snaps = [25, ]
-        pigs = ["/work/04808/tg841079/frontera/tng_fof/tng_fof_%03d/fof_subhalo_tab_%03d.*.hdf5" % ss for ss in snaps]
-        plot_smhm(pigs[0], color="black", ls=":", star=star, metal=False, scatter=False, hdf5=hdf5)
+        snaps = [13, 25]
+        pigs = ["/work/04808/tg841079/frontera/tng_fof/tng_fof_%03d/fof_subhalo_tab_%03d.*.hdf5" % (ss, ss) for ss in snaps]
+        color = ["black", "navy"]
+        for i, pp in enumerate(pigs):
+            plot_smhm(pp, color=color[i], ls=":", star=star, metal=False, scatter=False, hdf5=True)
     plt.xlabel(r"$M_\mathrm{h} (M_\odot)$")
     #plt.tight_layout()
     if star:
@@ -422,6 +428,7 @@ def plot_smhm_he_reion(pig, color=None, star=True, metal=False):
         else:
             stellarmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
     omega0 = bf["Header"].attrs["Omega0"]
+    #From the mass ratios
     omegab = bf["Header"].attrs["OmegaBaryon"]
     zz = 1/bf["Header"].attrs["Time"]-1
     heiifrac = bf['FOFGroups/MassHeIonized'][:]/(1e-6+bf['FOFGroups/MassByType'][:][:,0])
