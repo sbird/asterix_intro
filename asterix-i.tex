@@ -1,4 +1,4 @@
-% mnras_template.tex
+% mnras_template.tex 
 %
 % LaTeX template for creating an MNRAS paper
 %
@@ -106,7 +106,7 @@ and Nianyi Chen$^{2}$.
 % List of institutions
 $^{1}$ Department of Physics \& Astronomy, University of California, Riverside, 900 University Ave., Riverside, CA 92521, USA\\
 $^{2}$ McWilliams Center for Cosmology, Department of Physics, Carnegie Mellon University, Pittsburgh, PA 15213 \\
-$^{3}$ NSF AI Planning Institute for Physics of the Future,
+$^{3}$ NSF AI Planning Institute for Physics of the Future, 
 Carnegie Mellon  University, Pittsburgh, PA 15213, USA \\
 $^{4}$ Berkeley Center for Cosmological Physics and Department of Physics, University of California, Berkeley, CA 94720, USA
 }
@@ -124,7 +124,7 @@ $^{4}$ Berkeley Center for Cosmological Physics and Department of Physics, Unive
 
 % Abstract of the paper
 \begin{abstract}
-We introduce the \astrid~simulation, a large-scale cosmological hydrodynamic simulation in a $250 \mpch$ box with $2\times 5500^3$ particles. \astrid contains a large nuber of high redshift galaxies, which can be compared to future survey data, and resolves galaxies in halos more massive than $2\times 10^9 \msun$. \astrid~has been run from $z=99$ to $z=3$. As a particular focus is modelling the high redshift Universe, it contains models for inhomogeneous hydrogen and helium reionization, baryon relative velocities and massive neutrinos, as well as supernova and AGN feedback. The black hole model includes mergers driven by dynamical friction rather than repositioning. We briefly summarise the implemented models, and the technical choices we took when developing the simulation code. We validate the model, showing good agreement with observed UV luminosity functions, galaxy stellar mass functions and specific star formation rates. We show that the redshift at which a given galaxy underwent hydrogen reionization has a large effect on the halo gas fraction. Finally, halos with $M \sim 2\times 10^9 \msun$ which have been reionized have a star formation rate greater than those which have not by $1.5$ at $z=6$.
+We introduce the \astrid~simulation, a large-scale cosmological hydrodynamic simulation in a $250 \mpch$ box with $2\times 5500^3$ particles. \astrid contains a large number of high redshift galaxies, which can be compared to future survey data, and resolves galaxies in halos more massive than $2\times 10^9 \msun$. \astrid~has been run from $z=99$ to $z=3$. As a particular focus is modelling the high redshift Universe, it contains models for inhomogeneous hydrogen and helium reionization, baryon relative velocities and massive neutrinos, as well as supernova and AGN feedback. The black hole model includes mergers driven by dynamical friction rather than repositioning. We briefly summarise the implemented models, and the technical choices we took when developing the simulation code. We validate the model, showing good agreement with observed UV luminosity functions, galaxy stellar mass functions and specific star formation rates. We show that the redshift at which a given galaxy underwent hydrogen reionization has a large effect on the halo gas fraction. Finally, at $z=6$ halos with $M \sim 2\times 10^9 \msun$ which have been reionized have a star formation rate $1.5$ times greater than those which have not yet been reionized.
 \end{abstract}
 
 % Select between one and six entries from the list of approved keywords.
@@ -146,9 +146,9 @@ a plethora of new observations of high redshift galaxies will become available \
 
 Here we present the \astrid~simulation, which models a statistical sample of large halos at the same resolution as other large-scale cosmological galaxy formation simulations for $z > 3$. Concretely, \astrid~has $5500^3$ particles in a $250$ Mpc/h box, achieving a dark matter particle mass resolution of $10^7 M_\odot$. At $z=3$, \astrid contains $7129$ halos with a FOF mass greater than $10^{12} M_\odot$ and $47$ halos with a mass greater than $10^{13} M_\odot$. At $z=6$, it contains $44$ halos with a mass greater than $10^{12} M_\odot$. It thus contains a sample with the statistical power to examine the precursors of Milky-Way like galaxies into the epoch of reionization.
 
-For comparison, the TNG100 simulation had a mass resolution of $7.5 \times 10^6 M_\odot$ in a $75$ Mpc/h box, while TNG300 had a $205$ Mpc/h box with a mass resolution of $5.9\times 10^7 M_\odot$ \citep{2018MNRAS.475..676S, 2018MNRAS.475..624N, 2018MNRAS.480.5113M,2018MNRAS.477.1206N}. The EAGLE simulation had a mass resolution of $9.7 \times 10^6 M_\odot$ in a $70$ Mpc/h box \citep{2015MNRAS.446..521S}. \astrid thus has a mass resolution similar to TNG100 and EAGLE in a box larger than TNG300.
+For comparison, the TNG100 simulation had a mass resolution of $7.5 \times 10^6 M_\odot$ in a $75$ Mpc/h box, while TNG300 had a $205$ Mpc/h box with a mass resolution of $5.9\times 10^7 M_\odot$ \citep{2018MNRAS.475..676S, 2018MNRAS.475..624N, 2018MNRAS.480.5113M,2018MNRAS.477.1206N}. The EAGLE simulation had a mass resolution of $9.7 \times 10^6 M_\odot$ in a $70$ Mpc/h box \citep{2015MNRAS.446..521S}. \astrid thus has a mass resolution similar to TNG100 and EAGLE in a box larger than TNG300. 
 
-An earlier version of our code was used for the \bluetides simulation. \bluetides studied $z>6$ quasars and galaxies in a $400 \hmpc$ box, and has been validated against a number of observables \citep[e.g.][]{Feng:2016,Wilkins2017,DiMatteo2017,Tenneti2018,Huang2018,Ni2018,Bhowmick2018,Ni2020,Marshall2020,Marshall2021}.
+An earlier version of our code was used for the \bluetides simulation. \bluetides studied $z>6$ quasars and galaxies in a $400 \hmpc$ box, and has been validated against a number of observables \citep[e.g.][]{Feng:2016,Wilkins2017,DiMatteo2017,Tenneti2018,Huang2018,Ni2018,Bhowmick2018,Ni2020,Marshall2020,Marshall2021}. 
 \astrid~has a moderately lower total particle load than BlueTides ($2\times 5500^3$ vs $2 \times 7040^3$). However, it improves on the BlueTides mass resolution of $1.7 \times 10^7 M_\odot$ by almost a factor of two. Most importantly, for computational reasons the lowest redshift reached by BlueTides was $z=6.5$, but \astrid~reached $z=3$.
 
 The primary scientific focuses of \astrid~are high redshift galaxy formation and black hole mergers. To improve modelling of these areas, we have included several new physical processes into our simulation code. Importantly for galaxy formation, we include models for inhomogeneous hydrogen reionization (Section~\ref{sec:hydrogen}), helium reionization (Section~\ref{sec:helium}), metal return from massive stars (Section~\ref{sec:metals}), and the initial velocity offset between baryons and dark matter (Section~\ref{sec:ics}). To better describe black hole mergers, we have implemented a dynamic friction model (Section~\ref{sec:blackhole}). \astrid~was run using $3\times 10^6$ node-hours on the Frontera supercomputer (where each node contains $56$ Intel Xeon Platinum 8280 cores) using the \mpgadget~code \citep{MPGadget2018}. \mpgadget~implements a hybrid parallelization model with extensive shared and distributed memory parallelism.
@@ -198,14 +198,14 @@ In addition to describing the techniques used in performing the simulation, we p
 \label{sec:methods}
 
 % MP-Gadget.
-\mpgadget~\citep{MPGadget2018} is a massively scalable version of the cosmological structure formation code Gadget-3 \citep{Springel:2005}. The main new feature of \mpgadget~over Gadget-3 is shared memory parallelism using OpenMP threads, in addition to distributed memory parallelism using MPI. Gadget divides space into contiguous regions called processor domains by subdividing a Peano-Hilbert curve. Particles found within the contiguous region(s) assigned to a specific MPI rank are stored in local memory, while other particles are found in the memory assigned to their respective MPI ranks. \mpgadget~maintains a tree structure which covers all processor domains and which is walked to determine when communication is necessary. Our implementation of shared memory parallelism does not change this picture, but it makes the characteristic size of a domain larger, by associating all processors on a socket with a single MPI rank.
+\mpgadget~\citep{MPGadget2018} is a massively scalable version of the cosmological structure formation code Gadget-3 \citep{Springel:2005}. The main new feature of \mpgadget~over Gadget-3 is shared memory parallelism using OpenMP threads, in addition to distributed memory parallelism using MPI. Gadget divides space into contiguous regions called processor domains by subdividing a Peano-Hilbert curve. Particles found within the contiguous region(s) assigned to a specific MPI rank are stored in local memory, while other particles are found in the memory assigned to their respective MPI ranks. \mpgadget~maintains a tree structure which covers all processor domains and which is walked to determine when communication is necessary. Our implementation of shared memory parallelism does not change this picture, but it makes the characteristic size of a domain larger, by associating all processors on a socket with a single MPI rank. 
 
 Thus, while the basic algorithms are mostly unchanged from Gadget-3, the evolution from a pure MPI code has resulted in substantial changes to their implementation. In this Section we detail the main changes from \cite{Feng:2016} to our physics algorithms and the continuing improvements to scalability. %To reach $z=3$, \astrid~used $3\times 10^6$ node-hours on the Frontera supercomputer. Each node contains 56 Intel Xeon Platinum 8280 CPUs.
 We continue to use the \software{BigFile}\footnote{\url{http://github.com/rainwoodman/bigfile}} snapshot format, which transparently supports file-level striping and allows our IO to fully saturate Frontera's IO servers.
 
 \subsection{Gravity}
 \label{sec:gravity}
-The core of \mpgadget~remains a TreePM gravity solver \citep{Xu:1995, Bagla:2002, Springel:2005}, as in Gadget-3. Long-range forces are computed on a particle mesh in Fourier space, while short-range forces are computed using a hierarchical force tree. The short-range gravitational solver in particular has seen substantial scalability improvements which enabled an increase in the default force accuracy. We have verified that with our settings \mpgadget~is able to reproduce the matter power spectrum output by PKDGRAV3 \cite{2016JCAP...04..047S} with an error less than $1\%$.
+The core of \mpgadget~remains a TreePM gravity solver \citep{Xu:1995, Bagla:2002, Springel:2005}, as in Gadget-3. Long-range forces are computed on a particle mesh in Fourier space, while short-range forces are computed using a hierarchical force tree. The short-range gravitational solver in particular has seen substantial scalability improvements which enabled an increase in the default force accuracy. We have verified that with our settings \mpgadget~is able to reproduce the matter power spectrum output by PKDGRAV3 \cite{2016JCAP...04..047S} with an error less than $1\%$. 
 
 Every particle-mesh step we shift the positions of the particles by a constant random offset chosen uniformly between $0$ and $8$ particle-mesh grid cells, transparently undoing this offset before writing snapshots. This randomization of the particle positions relative to the box has no dynamic effect in a periodic box. However, it avoids temporal correlations in the tree opening criterion, which can eventually lead to pathological errors in tree node boundaries at high redshift, as explained in \cite{2020arXiv201003567S}.
 
@@ -213,26 +213,26 @@ Every particle-mesh step we shift the positions of the particles by a constant r
 
 Long-range gravitational forces are computed using a particle mesh approach. A density grid is computed using a cloud-in-cell mass deposition. The gravitational field is computed using the appropriate force kernels and real space forces are computed using Fourier-space finite differencing \citep[as in the HACC code:][]{2014arXiv1410.2805H}.
 
-Gadget-3's default particle mesh gravity solver
+Gadget-3's default particle mesh gravity solver 
 (used to compute long-range gravitational forces) is based on FFTW2. The distributed memory implementation of FFTW divides data into chunks along the first dimension of the transform and thus a 3D $N^3$ Fourier transform can only be distributed onto $N$ processors, a scalability limitation. \mpgadget~ instead uses a gravity solver based on \software{PFFT} \citep{doi:10.1137/120885887}, which divides data a 3D transform along $2$ dimensions, allowing the transform to be distributed among $N^2$ processors.
 
-In concert these changes removed the particle mesh step as a scalability bottleneck. The size of the particle grid used in \astrid~is $2^3\times N_\mathrm{PART} = 11000^3$, limited by available memory rather than the scalability of the Fourier transforms.
+In concert these changes removed the particle mesh step as a scalability bottleneck. The size of the particle grid used in \astrid~is $2^3\times N_\mathrm{PART} = 11000^3$, limited by available memory rather than the scalability of the Fourier transforms. 
 
 \subsubsection{Short-range gravity: multipole tree}
 
-Short-range forces are computed using a hierarchical multipole expansion of the gravitational field, leading to a uniformly high force resolution throughout the computational volume. As in Gadget-3, this short-range force is computed by walking a distributed tree structure, each layer of which contains moments describing the total mass within the node and the node center of mass \citep{1986Natur.324..446B}.\footnote{We do not implement the Fast Multipole Method (FMM) for short-range forces. \cite{2020arXiv201003567S} showed a relatively low performance improvement for FMM-PM over TreePM.} The short-range force algorithm is faster than a direct summation because the forces from a large number of distant particles can often be replaced by the force from a single multipole with minimal loss of accuracy.
+Short-range forces are computed using a hierarchical multipole expansion of the gravitational field, leading to a uniformly high force resolution throughout the computational volume. As in Gadget-3, this short-range force is computed by walking a distributed tree structure, each layer of which contains moments describing the total mass within the node and the node center of mass \citep{1986Natur.324..446B}.\footnote{We do not implement the Fast Multipole Method (FMM) for short-range forces. \cite{2020arXiv201003567S} showed a relatively low performance improvement for FMM-PM over TreePM.} The short-range force algorithm is faster than a direct summation because the forces from a large number of distant particles can often be replaced by the force from a single multipole with minimal loss of accuracy. 
 
 Gravitational forces are computed by walking the moment tree for each active particle. The local tree is walked for each particle first, with remote nodes being added to a communication list and walked in a second step. Shared memory parallelism is implemented by splitting particles into batches, with each batch processed in parallel by a different thread. The chunk size is initially $100$ particles, and is reduced in factors of $2$ when the number of remaining particles is lower than the current chunk size, as in the `guided' OpenMP scheduling strategy.
 
 \subsubsection{Building the Gravity Tree}
 
-In \astrid, the tree structure and associated moments are rebuilt every timestep. This differs from the version of the code used in \bluetides, where the tree persists and particle motion is accounted for by moving tree nodes according to the average velocity of particles within each node. However, we found that the \bluetides implementation limited force accuracy, as the velocity of individual particles may deviate substantially from the average in the node. Scalability was also adversely impacted, as the code was unaware if a particle crossed into a part of the particle tree on a separate processor, causing excessive communication between the stranded particle and the neighbours \citep{Bird:2018}.
+In \astrid, the tree structure and associated moments are rebuilt every timestep. This differs from the version of the code used in \bluetides, where the tree persists and particle motion is accounted for by moving tree nodes according to the average velocity of particles within each node. However, we found that the \bluetides implementation limited force accuracy, as the velocity of individual particles may deviate substantially from the average in the node. Scalability was also adversely impacted, as the code was unaware if a particle crossed into a part of the particle tree on a separate processor, causing excessive communication between the stranded particle and the neighbours \citep{Bird:2018}. 
 
-Since the tree is rebuilt every timestep, it represents a calculation overhead which limits the overall simulation time for deep timestep hierarchies. The tree build must thus be highly optimised and scale well with the number of threads. Building the tree has three separate substeps: in the first a shallow tree is built with leaf nodes, called top nodes, corresponding to the processor domains. In the second, particles are added to this shallow tree incrementally, with layers of extra tree nodes created once a leaf node contains the maximum number of particles ($8$). The third step is to compute the tree moments: the total mass and center of mass of all particles in the subtree. The first step has a trivial computational cost, due to the low number of nodes involved.
+Since the tree is rebuilt every timestep, it represents a calculation overhead which limits the overall simulation time for deep timestep hierarchies. The tree build must thus be highly optimised and scale well with the number of threads. Building the tree has three separate substeps: in the first a shallow tree is built with leaf nodes, called top nodes, corresponding to the processor domains. In the second, particles are added to this shallow tree incrementally, with layers of extra tree nodes created once a leaf node contains the maximum number of particles ($8$). The third step is to compute the tree moments: the total mass and center of mass of all particles in the subtree. The first step has a trivial computational cost, due to the low number of nodes involved. 
 
 The second step, tree node creation, is the most expensive part of the tree build and the most involved to parallelise. Our initial parallel implementation, used in \cite{Bird:2018}, guarded each tree node with a spinlock. New particles were added to the tree with this lock taken. Careful use of atomic instructions allowed us to walk the tree and find the right location to add a particle, taking the lock only when the correct node was identified. However, for \astrid, we found that the cost of the atomic instructions limited scalability to $\sim 10$ threads, less than half the hardware optimum of $28$.
 
-We have thus implemented a new, lockless, tree build algorithm. Each processor starts with a copy of the top nodes for the local MPI rank. Particles are processed in a parallel loop, with each particle added to the tree local to each processor. Once all particles have been processed, the partial trees are merged. Note that it is not possible a priori to ensure that these trees are disjoint. However, the particles are usually close to being in Peano-Hilbert order and so most of the particles associated with a particular top node will be spread over $1-2$ processors. Merging is done by simultaneously walking two particle trees, from a top node. When one of the walks encounters a leaf node, the particles in this leaf node are merged into the larger subtree and the parent nodes are updated to point to the new larger subtree. We create a copy of the top nodes for each of the $N_t$ OpenMP threads. To ensure our merging is lockless, we only allow one thread to merge together these $N_t$ top node copies. We also over-decompose the top-level domain to one top node per OpenMP thread (rather than one per MPI rank), so that all threads are busy during the merge step.
+We have thus implemented a new, lockless, tree build algorithm. Each processor starts with a copy of the top nodes for the local MPI rank. Particles are processed in a parallel loop, with each particle added to the tree local to each processor. Once all particles have been processed, the partial trees are merged. Note that it is not possible a priori to ensure that these trees are disjoint. However, the particles are usually close to being in Peano-Hilbert order and so most of the particles associated with a particular top node will be spread over $1-2$ processors. Merging is done by simultaneously walking two particle trees, from a top node. When one of the walks encounters a leaf node, the particles in this leaf node are merged into the larger subtree and the parent nodes are updated to point to the new larger subtree. We create a copy of the top nodes for each of the $N_t$ OpenMP threads. To ensure our merging is lockless, we only allow one thread to merge together these $N_t$ top node copies. We also over-decompose the top-level domain to one top node per OpenMP thread (rather than one per MPI rank), so that all threads are busy during the merge step. 
 
 Finally, moments are computed recursively, using almost the same algorithm as in Gadget-3. Computation starts at each top node, stopping at leaf nodes. OpenMP $4$ tasks are spawned at each recursion level, to a maximum of $512$ tasks. As a further performance optimisation we compute the moments for leaf nodes during the initial addition of the particle, thus avoiding the need to read particle data a second time during moment computation.
 
@@ -250,7 +250,7 @@ where $r_s$ is the force split scale and we define $A_\mathrm{smth} = r_s / (L /
 \label{sec:neutrinos}
 
 MP-Gadget includes a fast and accurate model for the effect of massive neutrinos on cosmological structure, following \cite{Yacine:2013}. This model includes the dynamic effect of neutrinos in each timestep.
-No explicit neutrino particles are included, but the neutrino perturbation is computed on the PM grid, using a linear response formula, from the non-linear growth of the dark matter. Short-range neutrino forces are neglected, a good approximation as neutrinos are free-streaming on scales smaller than a PM cell.
+No explicit neutrino particles are included, but the neutrino perturbation is computed on the PM grid, using a linear response formula, from the non-linear growth of the dark matter. Short-range neutrino forces are neglected, a good approximation as neutrinos are free-streaming on scales smaller than a PM cell. 
 We assume a single massive neutrino species with a mass of $0.06$~eV, the minimum from neutrino oscillation experiments \citep{deSalas:2018}. Neutrinos of this mass suppress the matter power spectrum by about $7-8\%$ at $k = 1 \hMpc$ and $z=9 - 2$ \citep{Bird:2018}.
 
 \subsection{Initial Conditions}
@@ -270,7 +270,7 @@ Following \cite{2020arXiv201003567S} we incorporate an extra timestep criterion 
 \begin{equation}
     \Delta t_i = C_\mathrm{CFL} h_i\left(\frac{\mathrm{d} h_i}{\mathrm{d}t}\right)^{-1}\,.
 \end{equation}
-The Courant factor $C_\mathrm{CFL} = 0.15$. This criterion affects $\sim 1/10^{4}$ gas particles, and has minimal dynamic impact, but it prevents the smoothing length estimate becoming too inaccurate for inactive particles.
+The Courant factor $C_\mathrm{CFL} = 0.15$. This criterion affects $\sim 1/10^{4}$ gas particles, and has minimal dynamic impact, but it prevents the smoothing length estimate becoming too inaccurate for inactive particles. 
 
 The SPH artificial viscosity is computed as a function of the relative velocity between a particle and its neighbours. Thus when a neighbour particle is not active, the effect of a partial kick to the current time of the active particle must be predicted. Similarly, the effect on the internal energy of the inactive particle of a partial cooling step should be applied when computing artificial viscosities. We found that computing these predicted quantities for every particle during every timestep represented a large source of overhead when the number of active particles was small. Accordingly, we compute predicted velocities and internal energies lazily. Predicted quantities are initially zero on each timestep. The first time a neighbour search encounters a particular particle, it initialises the predicted velocity using an atomic write.
 
@@ -279,15 +279,15 @@ The SPH artificial viscosity is computed as a function of the relative velocity 
 
 \begin{figure*}
 \centering
-  \includegraphics[width=0.45\textwidth]{plots/reion_hist.pdf}
-    \includegraphics[width=0.45\textwidth]{plots/reion_slice.pdf}
-  \caption{HI reionization history as a function of redshift. Shown is the total fraction of the volume which is neutral, and has not yet been exposed to an ionizing radiation field. The reionization midpoint is at $z=7.5$. For clarity, the $0.1\%$ of the volume reionized at $z > 11$ has been truncated. (Right) Slice showing reionization redshift in cells of depth $0-1$ Mpc/h.}
+  \includegraphics[width=0.45\textwidth]{plots/reion_hist.pdf}    
+    \includegraphics[width=0.45\textwidth]{plots/reion_slice.pdf}    
+  \caption{HI reionization history as a function of redshift. Shown is the total fraction of the volume which is neutral, and has not yet been exposed to an ionizing radiation field. The reionization midpoint is at $z=7.5$. For clarity, the $0.1\%$ of the volume reionized at $z > 11$ has been truncated. (Right) Slice showing reionization redshift in cells of depth $0-1$ Mpc/h.}   
   \label{fig:reion_hist}
 \end{figure*}
 
-We model patchy reionization with a spatially varying ultra-violet background using a semi-analytic method based on hydrodynamic simulations performed with radiative transfer \citep[for more details see][]{2013ApJ...776...81B}. The radiative transfer simulation is used to correlate reionization redshift with overdensity:  larger overdensities are assumed to contain more sources and hence reionize earlier. We generate a reionization redshift field in advance of the simulation using an approximate overdensity field computed from the initial conditions using FastPM \citep{2016MNRAS.463.2273F}. The reionization redshift is stored on a grid with a resolution of $1$ Mpc/h. During the simulation, each particle's position is checked against this grid to determine the reionization redshift.
+We model patchy reionization with a spatially varying ultra-violet background using a semi-analytic method based on hydrodynamic simulations performed with radiative transfer \citep[for more details see][]{2013ApJ...776...81B}. The radiative transfer simulation is used to correlate reionization redshift with overdensity:  larger overdensities are assumed to contain more sources and hence reionize earlier. We generate a reionization redshift field in advance of the simulation using an approximate overdensity field computed from the initial conditions using FastPM \citep{2016MNRAS.463.2273F}. The reionization redshift is stored on a grid with a resolution of $1$ Mpc/h. During the simulation, each particle's position is checked against this grid to determine the reionization redshift. 
 
-If the current time is earlier than this redshift, the photon background is set to zero and the particle remains neutral. In regions that have been reionized, we assume the UV background estimated by \cite{2020MNRAS.493.1614F}. We use the optically thin version, as the attenuating effects of reionization are included by our explicit reionization model.
+If the current time is earlier than this redshift, the photon background is set to zero and the particle remains neutral. In regions that have been reionized, we assume the UV background estimated by \cite{2020MNRAS.493.1614F}. We use the optically thin version, as the attenuating effects of reionization are included by our explicit reionization model. 
 %We do not boost the gas temperature to account for the passage of ionization fronts \citep{2019ApJ...874..154D}.
 
 Our fiducial reionization model has a median reionization redshift of $z \sim 7.5$, as suggested by the optical depth measurement of \cite{Planck}. Figure \ref{fig:reion_hist} shows the reionization history as a function of redshift. Although small parts of the box reionize early, the photon background is assumed to be zero at $z>10$ so this has no dynamic effect. Note that $10\%$ of the volume is neutral at $z=6.5$ and a small tail of gas remains neutral until $z < 6$. The right panel of figure~\ref{fig:reion_hist} shows the reionization redshift in a 2D slice of the box, the morphology of reionization in our model.
@@ -297,7 +297,7 @@ Our fiducial reionization model has a median reionization redshift of $z \sim 7.
 
 We additionally include a model for spatially inhomogeneous helium reionization following \cite{2020MNRAS.496.4372U}. Helium reionization begins at $z=4.4$ and finishes at $z=2.8$, with a linearly increasing reionization volume fraction. Reionized bubbles are placed around randomly chosen halos with mass $M_{\rm halo}\geq10^{12}$M$_{\odot}$, chosen to have a reasonable chance of hosting a quasar. Bubbles are $30$ Mpc/h across, matching the mean bubble size found in radiative transfer simulations \citep{2009ApJ...694..842M}. Inside this bubble a quasar radiation field is assumed with a spectral index of $\alpha_q = -2$.
 
-The model creates a split between photons with a mean free path larger than this bubble size, whose heating is handled homogeneously, and photons with a mean free path shorter than this bubble size, which instantaneously ionize the intergalactic gas. Particles are marked as ionized, and abruptly heated. Once marked they see the same homogeneous UVB as would be visible with the helium reionization model off.
+The model creates a split between photons with a mean free path larger than this bubble size, whose heating is handled homogeneously, and photons with a mean free path shorter than this bubble size, which instantaneously ionize the intergalactic gas. Particles are marked as ionized, and abruptly heated. Once marked they see the same homogeneous UVB as would be visible with the helium reionization model off. 
 
 Our model includes the patchiness of helium reionization and the resulting fluctuations in temperature, ionization state, and pressure smoothing. It captures the true scatter in the intergalactic medium temperature-density relation that should result from \ion{He}{II} reionization \citep{2020MNRAS.496.4372U}.
 
@@ -327,12 +327,12 @@ Mass and metal return is processed only when a star particle yields more than $1
 \subsection{Black Holes}
 \label{sec:blackhole}
 
-We include a treatment of super-massive black holes (SMBHs). The SMBH model is discussed in more detail in \cite{Ni:2021inprep} and summarised here. Our accretion and feedback models are similar to those in the \bluetides simulation \cite{Feng:2016}, and are based on earlier work by \cite{SDH2005,DSH2005}. The radiative efficiency of feedback is $0.05$.
+We include a treatment of super-massive black holes (SMBHs). The SMBH model is discussed in more detail in \cite{Ni:2021inprep} and summarised here. Our accretion and feedback models are similar to those in the \bluetides simulation \cite{Feng:2016}, and are based on earlier work by \cite{SDH2005,DSH2005}. The radiative efficiency of feedback is $0.05$. 
 
 We have modified the SMBH seeding scheme, drawing the BH seed mass from a power-law distribution instead of using a universal seed mass. SMBH particles are seeded by converting the densest gas particle. To be eligible for seeding, a halo must have total mass greater than $5\times10^{9}\,h^{-1}\unit{M_\odot}$ and stellar mass greater than $2 \times 10^6 h^{-1} M_\odot$.
-BH seed masses are drawn probabilistically from a power-law distribution with index $-1$, minimum mass $3 \times 10^4 h^{-1} M_\odot$ and maximum mass $3 \times 10^5 h^{-1} M_\odot$.
+BH seed masses are drawn probabilistically from a power-law distribution with index $-1$, minimum mass $3 \times 10^4 h^{-1} M_\odot$ and maximum mass $3 \times 10^5 h^{-1} M_\odot$. 
 
-Instead of constantly repositioning the black hole towards the potential minimum, as in earlier simulations, we implement a model for dynamical friction \citep{Tremmel2015, Tremmel2017, Chen2021}. Dynamical friction is an artificial force modelling unresolved small-scale interactions between the SMBH and nearby stars. These interactions transfer momentum from the SMBH to individual stars in the surrounding star clusters,  gradually reducing the momentum of the SMBH particle relative to the surrounding collisionless objects in the bulge \citep[e.g.][]{Governato1994,Kazantzidis2005}. Dynamical friction also stabilizes the BH motion at the center of the galaxy. We estimate dynamical friction using Eq. 8.3 of \cite{Binney2008}:
+Instead of constantly repositioning the black hole towards the potential minimum, as in earlier simulations, we implement a model for dynamical friction \citep{Tremmel2015, Tremmel2017, Chen2021}. Dynamical friction is an artificial force modelling unresolved small-scale interactions between the SMBH and nearby stars. These interactions transfer momentum from the SMBH to individual stars in the surrounding star clusters,  gradually reducing the momentum of the SMBH particle relative to the surrounding collisionless objects in the bulge \citep[e.g.][]{Governato1994,Kazantzidis2005}. Dynamical friction also stabilizes the BH motion at the center of the galaxy. We estimate dynamical friction using Eq. 8.3 of \cite{Binney2008}: 
 \begin{equation}
 \label{eq:df_full}
     \mathbf{F}_{\rm DF} = -16\pi^2 G^2 M_{\rm BH}^2 m_{a} \;\text{log}(\Lambda) \frac{\mathbf{v}_{\rm BH}}{v_{\rm BH}^3} \int_0^{v_{\rm BH}} dv_a v_a^2 f(v_a)\,.
@@ -342,13 +342,13 @@ $M_{\rm BH}$ is the BH mass, $\textbf{v}_{\rm BH}$ is the BH velocity relative t
     \Lambda = \frac{b_{\rm max}}{(GM_{\rm BH})/v_{\rm BH}^2}\,,
 \end{equation}
 where $b_{\rm max} = 20\text{ kpc}$.
-$f(v_a)$ in Eq.~\ref{eq:df_full} is the velocity distribution of the surrounding collisionless particles including both stars and dark matter, which we approximate by a Maxwellian distribution for each particle.
+$f(v_a)$ in Eq.~\ref{eq:df_full} is the velocity distribution of the surrounding collisionless particles including both stars and dark matter, which we approximate by a Maxwellian distribution for each particle. 
 Eq.~\ref{eq:df_full} reduces to
 \begin{equation}
     \label{eq:H14}
     \mathbf{F}_{\rm DF} = -4\pi \rho_{\rm sph} \left(\frac{GM_{\rm BH}}{v_{\rm BH}}\right)^2  \;\text{log}(\Lambda) \mathcal{F}\left(\frac{v_{\rm BH}}{\sigma_v}\right) \frac{\bf{v}_{\rm BH}}{v_{\rm BH}}.
 \end{equation}
-Here $\rho_{\rm sph}$ is the density of dark matter and star particles within the SPH kernel.
+Here $\rho_{\rm sph}$ is the density of dark matter and star particles within the SPH kernel. 
 The function $\mathcal{F}$, defined as
 \begin{equation}
     \label{eq:fx}
@@ -391,8 +391,8 @@ In this Section we present results from the simulation, focusing on the galaxy p
 
 \begin{figure}
 \centering
-  \includegraphics[width=0.45\textwidth]{plots/matterpower.pdf}
-  \caption{Matter power spectra as a function of redshift. Dotted lines show linear theory, solid lines show the simulation output.}
+  \includegraphics[width=0.45\textwidth]{plots/matterpower.pdf}    
+  \caption{Matter power spectra as a function of redshift. Dotted lines show linear theory, solid lines show the simulation output.}  
   \label{fig:matterpower}
 \end{figure}
 
@@ -406,8 +406,8 @@ As a first validation of the simulation we show the matter power spectra from th
   \includegraphics[width=1.0\textwidth]{plots/UVLF-subfind-z10-z3.png}
   \caption{Galaxy UV luminosity functions. Data points with error bars give the current observational results collected from \citet{Bouwens2015,Atek2015,Atek2018,Finkelstein2015,Bhatawdekar2019,Stefanon2019,Adams2020,Bowler2020,Bouwens2021}.
   The gray dashed lines are the intrinsic UV luminosity of the FOF groups.
-  The gray solid lines are the intrinsic UV luminosity for the identified \texttt{SUBFIND} galaxies.
-  The blue lines are the galaxy UV luminosity corrected for dust extinction.
+  The gray solid lines are the intrinsic UV luminosity for the identified \texttt{SUBFIND} galaxies. 
+  The blue lines are the galaxy UV luminosity corrected for dust extinction. 
 %   We identify galaxies with threshold $N_{\text{star}} > 32$. The turnover at $M_{\text{UV}} > -18$ at high redshift is caused by this resolution threshold, so that the luminosities predicted by \astrid~in this range might be incomplete.
  \tiziana{it would be interesting to show the AGN LFs in the UV (e.g. dotted line) to show the contribution from the AGN - which may be non-neglible at the bright end} \spb{It is an order of magnitude lower at -22: important at -24 and above but in the AGN paper already.} }
   \label{fig:UVLF}
@@ -415,25 +415,25 @@ As a first validation of the simulation we show the matter power spectra from th
 
 We calculate the galactic UV luminosity function by modelling the spectral energy distribution (SED).
 We assign a SED from a simple stellar population (SSP) to each star particle based on its mass, age and metallicity using the Binary Population and Spectral Population Synthesis model \citep[BPASS, version 2.2;][]{Stanway2018}, assuming a modified Salpeter initial mass function with a high-mass cut-off of $300M_\odot$.
-The SED of the galaxy is taken as the sum of the SEDs of each of its star particles.
+The SED of the galaxy is taken as the sum of the SEDs of each of its star particles. 
 
 As in \citet{Wilkins2017}, we model the dust attenuation of galaxies by relating the density of metals along a line of sight to the UV-band dust optical depth $\tau_{\rm UV}$. For each star particle in the galaxy, we calculate $\tau_{\rm UV,\ast}$ as
 \begin{equation}
 \label{eq:dust_extinction}
  \tau_{{\rm UV,}\ast}= -\kappa \Sigma(x, y, z) \left(\frac{\lambda}{5500\text{\normalfont\AA}}\right)^{\gamma}.
 \end{equation}
-where $\Sigma(x, y, z) = \int_{z'=0}^{z} \rho_{\rm metal}(x,y,z')dz'$ is the metal surface density at the position of the star particle, along the z-direction line of sight, and $\kappa$ and $\gamma$ are free parameters.
+where $\Sigma(x, y, z) = \int_{z'=0}^{z} \rho_{\rm metal}(x,y,z')dz'$ is the metal surface density at the position of the star particle, along the z-direction line of sight, and $\kappa$ and $\gamma$ are free parameters. 
 Here we use $\kappa=10^{4.1}$ and $\gamma=-1.0$, which are calibrated against the observed galaxy UV luminosity function at redshift $z=4$ and applied to all redshifts.
 The total dust-attenuated galaxy luminosity is the sum of the extincted luminosities of each individual star particle.
 
-Figure~\ref{fig:UVLF} shows the UV luminosity function (UVLF) compared to a variety of observations. Physically, the UVLF is correlated with the instantaneous star formation rate; agreement with the observations suggests that our star formation rates are realistic. We also show (dashed lines) the UVLF predictions from the \texttt{SUBFIND} objects. These are very similar to the results from the FOF catalogues, as the UV luminosity at these high redshifts is dominated by the largest galaxy in the FOF group.
+Figure~\ref{fig:UVLF} shows the UV luminosity function (UVLF) compared to a variety of observations. Physically, the UVLF is correlated with the instantaneous star formation rate; agreement with the observations suggests that our star formation rates are realistic. We also show (dashed lines) the UVLF predictions from the \texttt{SUBFIND} objects. These are very similar to the results from the FOF catalogues, as the UV luminosity at these high redshifts is dominated by the largest galaxy in the FOF group. 
 
 Comparing the results from \astrid~to observations shows that agreement is reasonable for most redshifts. Notice that the agreement in the regime where dust extinction is important is particularly good: dust extinction is calibrated at $z=4$, but the good agreement for other redshifts represents a genuine predictive success for the model. At $z < 6$, agreement with the observational data is very good even for fainter objects. For $z=7-8$, \astrid moderately under-predicts the luminosity of faint objects ($M_{UV} < -19$), although the discrepancy is at worst \citep[comparing to ][]{Bouwens2021} $2-\sigma$. At $z > 8$, we are again in agreement with observations, although the data is less constraining at these redshifts.
 
 \subsection{Galaxy Stellar Mass Function}
 \label{sec:gsmf}
 
-The galaxy stellar mass function, a histogram of stellar masses per unit volume, is one of the most fundamental quantities of galaxy formation theory. However, observations do not measure it directly, but deduce it from a combination of light curves and stellar population modelling.
+The galaxy stellar mass function, a histogram of stellar masses per unit volume, is one of the most fundamental quantities of galaxy formation theory. However, observations do not measure it directly, but deduce it from a combination of light curves and stellar population modelling. 
 
 \begin{figure*}
 \centering
@@ -472,13 +472,13 @@ Should the discrepancy persist observationally, possible explanations from the s
 %\centering
 %  \includegraphics[width=0.9\textwidth]{plots/Global-density-hist.png}
 %  \caption{\textit{Left panel}: the stellar mass and BH mass density (SMD and BHMD).
-%  The purple solid curve show the SMD accounting for galaxies with stellar mass $M_{*} > 10^7 M_{\odot}$ in the simulation.
+%  The purple solid curve show the SMD accounting for galaxies with stellar mass $M_{*} > 10^7 M_{\odot}$ in the simulation. 
 %  The red cross give the observational result from \citet{Grazian2015}.
 %  The blue solid curve show BHMD for all the BHs in astrid.
 %  The purple shaded area is the result from \citet{Volonteri2016}.
 %  The brown gray triangles are upper limits infered from the X-ray observations \citet{Salvaterra2012,Treister2013}.
 %  \textit{Right panel}:the SFR and BH accretion rate density (SFRD and BHAD).
-%  The same thresholds are used as the left panel. Observational results from \citet{Vito2016} and \citet{Vito2018} for SFRD and BHAD are shown in the brown stars and grey error bars \respectively). The purple dashed line show the simulation prediction from \citet{Sijacki2015} for comparison. \yueying{Updated observation data need to be collected.} \yueying{Check updates from Bouwen2020 Fig.19} \spb{Let's take the BHMD and BHAD stuff out: put it in the other paper. Then let's add BT to this.}}
+%  The same thresholds are used as the left panel. Observational results from \citet{Vito2016} and \citet{Vito2018} for SFRD and BHAD are shown in the brown stars and grey error bars \respectively). The purple dashed line show the simulation prediction from \citet{Sijacki2015} for comparison. \yueying{Updated observation data need to be collected.} \yueying{Check updates from Bouwen2020 Fig.19} \spb{Let's take the BHMD and BHAD stuff out: put it in the other paper. Then let's add BT to this.}}  
 %  \label{fig:Global-density}
 %\end{figure*}
 
@@ -492,17 +492,17 @@ Should the discrepancy persist observationally, possible explanations from the s
 \begin{figure}
 \centering
     \includegraphics[width=0.45\textwidth]{plots/ssfr.pdf}
-  \caption{Specific star formation rate (star formation rate per unit stellar mass). Shown are the median of all halos in stellar mass bins centered on $M_* = 4\times 10^{6}$, $10^{7}$, $10^{8}$, $10^9$ and $10^{10} \msun$ and spanning $\pm 30$ \protect\%. Grey band shows the $16$ and $84$ th percentile in the $M_* = 4\times 10^6 \msun$ bin. We compare to the results of \cite{2015ApJ...799..183S}, based on UV and optical data.}
+  \caption{Specific star formation rate (star formation rate per unit stellar mass). Shown are the median of all halos in stellar mass bins centered on $M_* = 4\times 10^{6}$, $10^{7}$, $10^{8}$, $10^9$ and $10^{10} \msun$ and spanning $\pm 30$ percent. Grey band shows the $16$ and $84$ th percentile in the $M_* = 4\times 10^6 \msun$ bin. We compare to the results of \protect\cite{2015ApJ...799..183S}, based on UV and optical data.}  
   \label{fig:ssfr}
 \end{figure}
 
-Figure~\ref{fig:avgsfr} shows the average star formation rate at fixed halo mass as a function of redshift. Although this quantity is not directly observable as halo masses are not accessible for this era, we nevertheless show it for physical insight. Shown is the median star formation rate in each bin, as well as the $16$th and $84$th percentiles as coloured bands. The bands thus show not statistical uncertainty, but a measure of the scatter between star formation rates in different halos. This scatter is larger as a fraction of the SFR in smaller halos. This reflects both that star formation in small halos is inherently bursty due to supernova feedback and that the number of star forming particles in small halos is lower. Average star formation rates are as expected, larger in more massive halos, and reduce moderately with decreasing redshift. This reduction is especially noticeable for low mass halos after HI reionization ($z \sim 6$), and after the start of HeII reionization ($z=4.4$). In Section~\ref{sec:sfrreion} we will examine the effect of reionization on star formation rates more directly.
+Figure~\ref{fig:avgsfr} shows the average star formation rate at fixed halo mass as a function of redshift. Although this quantity is not directly observable as halo masses are not accessible for this era, we nevertheless show it for physical insight. Shown is the median star formation rate in each bin, as well as the $16$th and $84$th percentiles as coloured bands. The bands thus show not statistical uncertainty, but a measure of the scatter between star formation rates in different halos. This scatter is larger as a fraction of the SFR in smaller halos. This reflects both that star formation in small halos is inherently bursty due to supernova feedback and that the number of star forming particles in small halos is lower. Average star formation rates are as expected, larger in more massive halos, and reduce moderately with decreasing redshift. This reduction is especially noticeable for low mass halos after HI reionization ($z \sim 6$), and after the start of HeII reionization ($z=4.4$). In Section~\ref{sec:sfrreion} we will examine the effect of reionization on star formation rates more directly. 
 
-We do not show a comparison to observational estimates of star formation rates \citep[see][for a review]{2013ApJ...770...57B}. The underlying observations are generally UV luminosity functions, combined with dust correction estimates. We directly predict UV luminosity functions from the simulation in Figure~\ref{fig:UVLF} and so little information would be added by comparing our simulation to star formation rates derived from this same observational data. Directly predicting the observational data from the simulation is more reliable as the metallicity of the galaxy is observationally uncertain but available in the simulation, allowing better estimates of dust extinction.
+We do not show a comparison to observational estimates of star formation rates \citep[see][for a review]{2013ApJ...770...57B}. The underlying observations are generally UV luminosity functions, combined with dust correction estimates. We directly predict UV luminosity functions from the simulation in Figure~\ref{fig:UVLF} and so little information would be added by comparing our simulation to star formation rates derived from this same observational data. Directly predicting the observational data from the simulation is more reliable as the metallicity of the galaxy is observationally uncertain but available in the simulation, allowing better estimates of dust extinction. 
 
 Finally, note that halo masses are not observed quantities but estimated using abundance matching and thus observational results which compare to them implicitly rely on dark matter only simulations. \astrid~has the same box size as the MultiDark simulation \citep{2016MNRAS.457.4340K} used by \cite{2019MNRAS.488.3143B} for abundance matching star formation histories, but includes substantially higher fidelity models of the physical processes of galaxy formation.
 
-Figure~\ref{fig:ssfr} shows the specific star formation rate (the star formation rate per unit stellar mass, sSFR) for a variety of stellar mass bins. Our results show that star formation rate per unit stellar mass is approximately constant for all stellar masses. Between $z=9$ and $z=5$ the median sSFR in galaxies with $M_* \leq 10^7 \msun$ is about $20\%$ lower than for galaxies with $M_* \geq 10^8 \msun$, which may be due to a suppression of star formation in small halos during reionization.
+Figure~\ref{fig:ssfr} shows the specific star formation rate (the star formation rate per unit stellar mass, sSFR) for a variety of stellar mass bins. Our results show that star formation rate per unit stellar mass is approximately constant for all stellar masses. Between $z=9$ and $z=5$ the median sSFR in galaxies with $M_* \leq 10^7 \msun$ is about $20\%$ lower than for galaxies with $M_* \geq 10^8 \msun$, which may be due to a suppression of star formation in small halos during reionization. 
 
 The overall redshift trend is for a decreasing specific star formation rate, from $1.5 \times 10^{-8}$ yr$^{-1}$ at $z=10$ to $3 \times 10^{-9}$ yr$^{-1}$ at $z=4$. This is consistent with the expectation of the halo model: the concentration and thus internal density of a halo is proportional to the background density at the time it virializes. Halos of a given mass at lower redshift have virialized later and thus have a lower internal density. Our predictions are in reasonable agreement with the observational star formation measurements of \cite{2015ApJ...799..183S}, although observational errors at high redshifts remain relatively large. We also agree with the abundance matching model of \cite{2013ApJ...770...57B} (not shown), which is influenced by lower redshift data through N-body simulations.
 
@@ -510,27 +510,27 @@ The overall redshift trend is for a decreasing specific star formation rate, fro
 
 \begin{figure}
 \centering
-  \includegraphics[width=0.45\textwidth]{plots/smhms.pdf}
-  \caption{Median stellar mass divided by halo mass as a function of halo mass, for $z=10-3$. Each halo mass bin must contains at least $10$ halos, to reduce statistical noise. Grey band shows the $16$th and $84$th percentiles in the lowest redshift snapshot at $z=3$.}
+  \includegraphics[width=0.45\textwidth]{plots/smhms.pdf}    
+  \caption{Median stellar mass divided by halo mass as a function of halo mass, for $z=10-3$. Each halo mass bin must contains at least $10$ halos, to reduce statistical noise. Grey band shows the $16$th and $84$th percentiles in the lowest redshift snapshot at $z=3$.}  
   \label{fig:smhm}
 \end{figure}
 
 \begin{figure*}
 \centering
-  \includegraphics[width=0.45\textwidth]{plots/gmhms.pdf}
+  \includegraphics[width=0.45\textwidth]{plots/gmhms.pdf}    
   \includegraphics[width=0.45\textwidth]{plots/gmhms-all.pdf}
-  \caption{Median gas mass divided by halo mass as a function of halo mass, at $z=10-3$. Each halo mass bin must contains at least $10$ halos, to reduce statistical noise. Grey band shows the $16$th and $84$th percentiles in the lowest redshift snapshot at $z=3$. (Left) Gas fraction only. (Right) Baryon (gas, star and black hole) fraction. }
+  \caption{Median gas mass divided by halo mass as a function of halo mass, at $z=10-3$. Each halo mass bin must contains at least $10$ halos, to reduce statistical noise. Grey band shows the $16$th and $84$th percentiles in the lowest redshift snapshot at $z=3$. (Left) Gas fraction only. (Right) Baryon (gas, star and black hole) fraction. }  
   \label{fig:gmhm}
 \end{figure*}
 
 \begin{figure}
 \centering
-  \includegraphics[width=0.45\textwidth]{plots/gmhms_reion.pdf}
-  \caption{Median gas mass divided by halo mass as a function of halo mass. Each halo mass bin must contains at least $10$ halos, to reduce statistical noise. Shown is the gas fraction in halos that reionized before and after $z=7.5$, the midpoint of reionization in our model. Halos which reionized later have a lower gas fraction.}
+  \includegraphics[width=0.45\textwidth]{plots/gmhms_reion.pdf}    
+  \caption{Median gas mass divided by halo mass as a function of halo mass. Each halo mass bin must contains at least $10$ halos, to reduce statistical noise. Shown is the gas fraction in halos that reionized before and after $z=7.5$, the midpoint of reionization in our model. Halos which reionized later have a lower gas fraction.}  
   \label{fig:gmhm_reion}
 \end{figure}
 
-Figure~\ref{fig:smhm} shows the stellar mass-halo mass relation, as well as an estimate of the scatter at the $z=3$. The scatter at higher redshift is similar. For low halo masses the stellar mass - halo mass relation is redshift invariant. For $M > 10^{10} \msun$, halos with similar masses at higher redshifts have lower stellar mass, reflecting that they are only recently assembled and have not yet had an opportunity to form stars.
+Figure~\ref{fig:smhm} shows the stellar mass-halo mass relation, as well as an estimate of the scatter at the $z=3$. The scatter at higher redshift is similar. For low halo masses the stellar mass - halo mass relation is redshift invariant. For $M > 10^{10} \msun$, halos with similar masses at higher redshifts have lower stellar mass, reflecting that they are only recently assembled and have not yet had an opportunity to form stars. 
 
 Our results are in good agreement with models derived from abundance matching \citep{2019MNRAS.488.3143B} and recent \texttt{THESAN} radiative transfer simulations \citep{2021arXiv211000584K} at $z > 5$. Figure 6 of \cite{2014MNRAS.445..175G} shows that our results agree with the stellar mass fraction predicted by the Illustris simulation at $z = 3-4$, demonstrating that our feedback model is behaving as expected.
 
@@ -548,19 +548,19 @@ In our reionization model, $z_{re}$ is correlated with overdensity on Mpc-scales
 
 \begin{figure}
 \centering
-  \includegraphics[width=0.45\textwidth]{plots/starmetal_oh.pdf}
+  \includegraphics[width=0.45\textwidth]{plots/starmetal_oh.pdf}    
   \caption{Stellar oxygen abundance as a function of stellar mass. Shown is the oxygen number abundance per unit hydrogen abundance in stars. The hydrogen mass abundance is assumed to be $0.76\times M_*$. Data is a power law fit to a stack of galaxies centered on $z=3.3$ \protect\citep{2021ApJ...914...19S}.}
   \label{fig:stellar_metal}
 \end{figure}
 
 %\begin{figure}
 %\centering
-%  \includegraphics[width=0.45\textwidth]{plots/gasmetal.pdf}
-% \caption{Gas Metallicities as a function of stellar mass. }
+%  \includegraphics[width=0.45\textwidth]{plots/gasmetal.pdf}    
+% \caption{Gas Metallicities as a function of stellar mass. }  
 % \label{fig:gas_metal}
 %\end{figure}
 
-Figure~\ref{fig:stellar_metal} shows the stellar O/H abundance as a function of stellar mass. Note that the normalisation of the mass metallicity relation is observationally uncertain \citep{2019MNRAS.484.5587T} and so the most reliable comparison is to the slope. Nevertheless, our simulation is in good agreement with the observations of \cite{2021ApJ...914...19S} in both normalisation and slope, in the limited mass range where they currently overlap. The mass-metallicity relation in our simulation forms a single unbroken power law over $5$ decades of galaxy stellar mass. Redshift evolution is small, but not zero, with the normalisation of the mass-metallicity relation increasing over time as extra metal mass is formed.
+Figure~\ref{fig:stellar_metal} shows the stellar O/H abundance as a function of stellar mass. Note that the normalisation of the mass metallicity relation is observationally uncertain \citep{2019MNRAS.484.5587T} and so the most reliable comparison is to the slope. Nevertheless, our simulation is in good agreement with the observations of \cite{2021ApJ...914...19S} in both normalisation and slope, in the limited mass range where they currently overlap. The mass-metallicity relation in our simulation forms a single unbroken power law over $5$ decades of galaxy stellar mass. Redshift evolution is small, but not zero, with the normalisation of the mass-metallicity relation increasing over time as extra metal mass is formed. 
 
 \subsection{Effect of Hydrogen Reionization on Star Formation Rates and Gas Fractions}
 \label{sec:sfrreion}
@@ -574,24 +574,24 @@ Figure~\ref{fig:stellar_metal} shows the stellar O/H abundance as a function of 
 
 Figure~\ref{fig:avgsfr_reion} shows the effect of HI reionization on the star formation rate (SFR) in each halo. Note that we do not include an instantaneous heating effect from the passage of the ionization fronts \citep{2019ApJ...874..154D}, so this probably underestimates the magnitude of the effect. Nevertheless, we find that low mass halos experience a marked reduction in star formation rate ($50\%$ in the lowest mass bin) after reionization, especially for $z<7$. We also show the scatter: note this is not the sampling uncertainty, but the width in the distribution of SFRs. Although the scatter is large, representing the bursty nature of low-mass star formation, the change in the star formation rates is stable with redshift, suggesting that the effect of reionization on star formation in our simulation is persistent. There is no effect for halos with $M_{\rm h} > 10^{10} \msun$, a median stellar mass of $M_* = 2 \times 10^7 \msun$. Figure~\ref{fig:GSMF} shows that \cite{Song2016} has reported a GSMF in this stellar mass bin, although at $z > 6$ the uncertainties are larger than the effect. Nevertheless, there is the possibility that it may be possible to measure this effect with JWST.
 
-We have also checked whether the redshift of inhomogeneous helium reionization in the simulation altered star formation rates and found minimal change.
+We have also checked whether the redshift of inhomogeneous helium reionization in the simulation altered star formation rates and found minimal change. 
 
 \section{Conclusions}
 
 In this paper, we have introduced the \astrid~simulation. \astrid is a large-scale, $250 \mpch$ box, simulation with $2\times 5500^3$ particles. It thus contains a statistical sample of halos equivalent to  MultiDark \citep{2016MNRAS.457.4340K}, yet is able to resolve galaxy formation at a level comparable to Illustris-TNG 100 \citep{2018MNRAS.475..648P}. It has been run from $z=99$ to $z=3$\footnote{During the preparation of this paper we continued to run the simulation and it has now reached $z=2.8$.}. A particular focus has been on modelling the high redshift Universe and \astrid~includes models for inhomogeneous hydrogen and helium reionization, baryon relative velocities and massive neutrinos. We have briefly summarised the implemented models, and the technical choices we took when developing the simulation code.
 
-We have shown that \astrid~reproduces current observations of galaxies at $z=10-3$, including the UV luminosity function and the galaxy stellar mass function. We also computed stellar and gas mass fractions, metallicities and star formation rates. All were in good agreement with expectations from other simulations. We showed that hydrogen reionization has a strong effect on star formation rates and gas fractions. Our companion paper \citep{Ni:2021inprep} examines the statistics of black holes.
+We have shown that \astrid~reproduces current observations of galaxies at $z=10-3$, including the UV luminosity function and the galaxy stellar mass function. We also computed stellar and gas mass fractions, metallicities and star formation rates. All were in good agreement with expectations from other simulations. We showed that hydrogen reionization has a strong effect on star formation rates and gas fractions. Our companion paper \citep{Ni:2021inprep} examines the statistics of black holes. 
 
 \astrid contains an unusually large number of high redshift halos, which will enable several related investigations. In future work we will make mock galaxy observations for JWST, mock black hole merger catalogues for LISA, as well as mock X-ray catalogues and quasar spectra.
 
 \section*{Acknowledgements}
 
 \astrid was run on the Frontera facility at the Texas Advanced Computing Center.
-We acknowledge helpful discussions with Steve Wilkins.
-SB was supported by NSF grant AST-1817256.
-TDM and RACC acknowledge funding from
-the NSF AI Institute: Physics of the Future, NSF PHY-2020295,
-NASA ATP NNX17AK56G, and NASA ATP 80NSSC18K101. TDM acknowledges additional support from  NSF ACI-1614853, NSF AST-1616168, NASA ATP 19-ATP19-0084,
+We acknowledge helpful discussions with Steve Wilkins. 
+SB was supported by NSF grant AST-1817256. 
+TDM and RACC acknowledge funding from 
+the NSF AI Institute: Physics of the Future, NSF PHY-2020295, 
+NASA ATP NNX17AK56G, and NASA ATP 80NSSC18K101. TDM acknowledges additional support from  NSF ACI-1614853, NSF AST-1616168, NASA ATP 19-ATP19-0084, 
   and NASA ATP 80NSSC20K0519, and RACC from NSF AST-1909193.
 We are grateful for the work of Astrid Lindgren, the author of Pippi Longstocking, after whom this simulation is named.
 
