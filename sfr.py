@@ -4,6 +4,7 @@ import glob
 import sys
 import numpy as np
 import h5py
+import corecon as crc
 import matplotlib.pyplot as plt
 from bigfile import BigFile
 
@@ -164,6 +165,7 @@ def plot_avg_sfr_reion(reds, outdir):
     colors_reion = ["darkred", "navy", "brown", "black"]
     colors_no_reion = ["red", "blue", "orange", "grey"]
     labels = [r"$2\times 10^{9}$", r"$5\times 10^{9}$", r"$10^{10}$", r"$5\times 10^{10}$"]
+    lss_ratio = ["-", "--", ":", "-."]
     uvf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
     zreion = uvf["Zreion_Table"][:]
     nmesh = uvf["Zreion_Table"].attrs["Nmesh"][0]
@@ -172,24 +174,32 @@ def plot_avg_sfr_reion(reds, outdir):
     sfrs_reion, sfrs_no_reion = zip(*[get_avg_sfr_reion(pig, zreion, nmesh) for pig in pigs])
     sfrs_reion = np.array(sfrs_reion)
     sfrs_no_reion = np.array(sfrs_no_reion)
-    plt.xlabel("z")
-    plt.ylabel(r"SFR ($M_\odot$ yr$^{-1}$)")
-    plt.yscale('log')
-    plt.ylim(ymin=1e-6)
-    plt.xlim(xmin=5.5, xmax=reds[0])
+    fig = plt.figure()
+    gs = fig.add_gridspec(2,1, hspace=0, height_ratios=[0.7,0.3])
+    lower = fig.add_subplot(gs[1,0])
+    lower.set_xlim(xmin=5.5, xmax=reds[0])
+    lower.set_xlabel("z")
+    lower.set_ylim(ymin=1, ymax=1.55)
+    lower.set_ylabel("$\Delta$ SFR", fontsize=14)
+    upper = fig.add_subplot(gs[0,0], sharex=lower)
+    plt.setp(upper.get_xticklabels(), visible=False)
+    upper.set_ylabel(r"SFR ($M_\odot$ yr$^{-1}$)",fontsize=14)
+    upper.set_yscale('log')
+    hatches = ['X', '/', r'\\', '|']
+    upper.set_ylim(ymin=1e-6, ymax=1)
     for i in range(np.shape(sfrs_reion)[1]):
         j = np.where(sfrs_reion[:,i,2] > 0)
-        plt.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], color=colors_reion[i], alpha=0.15)
+        upper.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], facecolor="none", edgecolor=colors_reion[i], alpha=0.15, hatch=hatches[i])
         j = np.where(sfrs_reion[:,i,1] > 0)
-        plt.plot(reds[j], sfrs_reion[j[0],i,1], label="HII: "+labels[i], color=colors_reion[i], ls="-")
+        upper.plot(reds[j], sfrs_reion[j[0],i,1], color=colors_reion[i], ls="-", label="HII: "+labels[i])
         #j = np.where(sfrs_no_reion[:,i,2] > 0)
         #plt.fill_between(reds[j], sfrs_no_reion[j[0],i,0]+1e-14, sfrs_no_reion[j[0],i,2], color=colors_no_reion[i], alpha=0.15)
         j = np.where(sfrs_no_reion[:,i,1] > 0)
-        plt.plot(reds[j], sfrs_no_reion[j[0],i,1], label="HI: " + labels[i], color=colors_no_reion[i], ls="--")
+        upper.plot(reds[j], sfrs_no_reion[j[0],i,1], color=colors_no_reion[i], ls="--", label="HI: "+labels[i])
         #np.savetxt("asfr-mdm%d.txt" % i, np.vstack((reds[j], sfrs[j[0],i,:].T)).T, header="# MDM = "+labels[i]+" (redshift : SFR 16, 50, 84 percentiles )")
-    plt.ylim(ymin=1e-6, ymax=2)
-    plt.xlim(xmin=5.5, xmax=reds[0])
-    plt.legend(loc="lower left", ncol=2)
+        lower.plot(reds[j], sfrs_no_reion[j[0],i,1]/sfrs_reion[j[0],i,1]-1, color=colors_reion[i], ls=lss_ratio[i], label=labels[i])
+    lower.legend(loc="upper right", ncol=2, fontsize=12)
+    upper.legend(loc="lower right", ncol=2, fontsize=12)
     #plt.tight_layout()
     plt.savefig("avg_sfr_reion.pdf")
 
@@ -248,7 +258,7 @@ def plot_avg_sfr_heii_reion(reds, outdir):
     #plt.tight_layout()
     plt.savefig("avg_sfr_heii_reion.pdf")
 
-def load_bigfile_data(pig, metal=False, star=True):
+def load_bigfile_data(pig, metal=False, star=True, allbar=False):
     """Load the stellar mass data from a bigfile."""
     bf = BigFile(pig)
     hh = bf["Header"].attrs["HubbleParam"]
@@ -260,6 +270,9 @@ def load_bigfile_data(pig, metal=False, star=True):
             metals = bf["FOFGroups/StellarMetalElemMass"][:]*1e10/hh
     else:
         starmass = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
+        if allbar:
+            starmass += bf['FOFGroups/MassByType'][:][:,4]*1e10/hh
+            starmass += bf['FOFGroups/MassByType'][:][:,5]*1e10/hh
         if metal:
             metals = bf["FOFGroups/GasMetalElemMass"][:]*1e10/hh
     omega0 = bf["Header"].attrs["Omega0"]
@@ -295,12 +308,12 @@ def load_h5py_data(fofpattern, metal=False, star=True):
         starmass = np.concatenate([starmass, sm])
     return (omega0, omegab, zz, metals, starmass, fofmasses)
 
-def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True, hdf5=False):
+def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True, hdf5=False, allbar=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
     if hdf5:
         (omega0, omegab, zz, metals, starmass, fofmasses) = load_h5py_data(pig, metal=metal, star=star)
     else:
-        (omega0, omegab, zz, metals, starmass, fofmasses) = load_bigfile_data(pig, metal=metal, star=star)
+        (omega0, omegab, zz, metals, starmass, fofmasses) = load_bigfile_data(pig, metal=metal, star=star, allbar=allbar)
     if metal:
         ii = np.where(starmass > 0)
         oxy = metals[:,4]
@@ -353,7 +366,7 @@ def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True, hd
             fname = "data/gasm-" + fname
     np.savetxt(fname, np.vstack((masses[ii], smhm_lower[ii], smhm_bin[ii], smhm_upper[ii])).T, header="# "+label+" (mass : SMHM (16, 50, 84))")
 
-def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
+def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False, allbar=False):
     """Plot several SMHM over time."""
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
@@ -371,7 +384,7 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
         #plt.plot(m10, zobs, ls="-",color="blue")
         plt.fill_between(m10, zupper, zlower, color="green", alpha=0.2, label="Sanders+21")
     for ii in np.arange(len(reds)):
-        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % len(lss)], star=star, metal=metal, scatter=(ii ==len(reds)-1), hdf5=False)
+        plot_smhm(pigs[ii], color=colors[ii], ls=lss[ii % len(lss)], star=star, metal=metal, scatter=(ii ==len(reds)-1), hdf5=False, allbar=allbar)
     if hdf5:
         snaps = [13, 25]
         pigs = ["/work/04808/tg841079/frontera/tng_fof/tng_fof_%03d/fof_subhalo_tab_%03d.*.hdf5" % (ss, ss) for ss in snaps]
@@ -405,10 +418,14 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False):
             plt.xlabel(r"$M_\mathrm{*} (M_\odot)$")
             plt.savefig("gasmetal_oh.pdf")
         else:
-            plt.ylabel(r"$M_g / M_\mathrm{h} (\Omega_M / \Omega_b)$")
             plt.legend(loc="lower center")
             plt.ylim(0.5, 1)
-            plt.savefig("gmhms.pdf")
+            if allbar:
+                plt.ylabel(r"$M_b / M_\mathrm{h} (\Omega_M / \Omega_b)$")
+                plt.savefig("gmhms-all.pdf")
+            else:
+                plt.ylabel(r"$M_g / M_\mathrm{h} (\Omega_M / \Omega_b)$")
+                plt.savefig("gmhms.pdf")
 
 def plot_smhm_he_reion(pig, color=None, star=True, metal=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
@@ -648,15 +665,25 @@ def plot_smhms_reion(reds, outdir, star=True, metal=False):
             plt.ylim(0.5, 1)
             plt.savefig("gmhms_reion.pdf")
 
+def get_reion_data(keylist):
+    """Print data for ionized fraction"""
+    ioniz_data = crc.get("ionized_fraction")
+    for key in keylist:
+        data = ioniz_data[key]
+        errors = np.vstack([data.err_down, data.err_up])
+        plt.errorbar(data.axes, 1-data.values, yerr=errors, fmt='d', label=key, color="black")
+
 def plot_reionization_history(outdir):
     """Reionization history as a function of redshift."""
     bf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
     zreion = bf["Zreion_Table"][:]
-    zreion[np.where(zreion > 11)] = 11
+    zreion[np.where(zreion > 10)] = 10
     bf.close()
     plt.hist(zreion, 50, cumulative=True, density=True)
     plt.xlabel('z')
     plt.ylabel(r'$x_{HI}$')
+    keylist = ['Davies et al. 2018', 'Fan et al. 2006', 'Greig et al. 2019', 'Hoag et al. 2019', 'Mason et al. 2018', 'Ono et al. 2012', 'Ota et al. 2008', 'Wang et al. 2020 (subm.)', 'Yang et al. 2020']
+    get_reion_data(keylist)
     #plt.tight_layout()
     plt.savefig("reion_hist.pdf")
 
