@@ -179,17 +179,20 @@ def plot_avg_sfr_reion(reds, outdir):
     lower = fig.add_subplot(gs[1,0])
     lower.set_xlim(xmin=5.5, xmax=reds[0])
     lower.set_xlabel("z")
-    lower.set_ylim(ymin=1, ymax=1.55)
+    lower.set_ylim(ymin=0, ymax=0.55)
     lower.set_ylabel("$\Delta$ SFR", fontsize=14)
     upper = fig.add_subplot(gs[0,0], sharex=lower)
     plt.setp(upper.get_xticklabels(), visible=False)
     upper.set_ylabel(r"SFR ($M_\odot$ yr$^{-1}$)",fontsize=14)
     upper.set_yscale('log')
-    hatches = ['X', '/', r'\\', '|']
+    hatches = [None, '/', None, 'X']
     upper.set_ylim(ymin=1e-6, ymax=1)
     for i in range(np.shape(sfrs_reion)[1]):
         j = np.where(sfrs_reion[:,i,2] > 0)
-        upper.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], facecolor="none", edgecolor=colors_reion[i], alpha=0.15, hatch=hatches[i])
+        if hatches[i] is not None:
+            upper.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], facecolor="none", edgecolor=colors_reion[i], alpha=0.15, hatch=hatches[i])
+        else:
+            upper.fill_between(reds[j], sfrs_reion[j[0],i,0]+1e-14, sfrs_reion[j[0],i,2], color=colors_reion[i], alpha=0.15)
         j = np.where(sfrs_reion[:,i,1] > 0)
         upper.plot(reds[j], sfrs_reion[j[0],i,1], color=colors_reion[i], ls="-", label="HII: "+labels[i])
         #j = np.where(sfrs_no_reion[:,i,2] > 0)
@@ -308,6 +311,14 @@ def load_h5py_data(fofpattern, metal=False, star=True):
         starmass = np.concatenate([starmass, sm])
     return (omega0, omegab, zz, metals, starmass, fofmasses)
 
+def plot_thesan_smhm(datafile, red=None, color="black", ls="-"):
+    """Plot the stellar-mass/halo-mass relation from THESAN"""
+    data = np.loadtxt(datafile)
+    #log(Halo Mass [Msun])  Median-log(Stellar mass [Msun]) 10 percentile-log(Stellar mass [Msun])  90 percentile-log(Stellar mass [Msun])
+    ombyob = 0.3089/0.0486
+    #plt.fill_between(10**data[:,0], 10**data[:,2]/10**data[:,0]*ombyob, 10**data[:,3]/10**data[:,0]*ombyob, alpha=0.15)
+    plt.plot(10**data[:,0], 10**data[:,1]/10**data[:,0]*ombyob, color=color, ls=ls, label="TSN z=%d" % red)
+
 def plot_smhm(pig, color=None, ls=None, star=True, metal=False, scatter=True, hdf5=False, allbar=False):
     """Plot the stellar/gas mass to halo mass. If star is True, stars, else gas."""
     if hdf5:
@@ -371,7 +382,7 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False, allbar=False):
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
     colors = ["red", "blue", "brown", "black", "grey"]
-    lss = [":", "-.", "--", "-"]
+    lss = [":", "--", "--", "-"]
     if star and metal:
         #FIt from table 3 of https://arxiv.org/pdf/2009.07292.pdf
         m10 = np.logspace(9, 10.5, 50)
@@ -403,7 +414,7 @@ def plot_smhms(reds, outdir, star=True, metal=False, hdf5=False, allbar=False):
             #plt.yscale('log')
             plt.savefig("starmetal_oh.pdf")
         else:
-            plt.legend(loc="upper left")
+            plt.legend(loc="lower right")
             plt.yscale('log')
             plt.ylabel(r"$M_* / M_\mathrm{h} (\Omega_M / \Omega_b)$")
             plt.ylim(ymin=5e-4)
