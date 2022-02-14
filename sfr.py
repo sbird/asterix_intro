@@ -3,6 +3,7 @@ import os
 import glob
 import sys
 import numpy as np
+import scipy.stats
 import h5py
 import corecon as crc
 import matplotlib.pyplot as plt
@@ -635,6 +636,60 @@ def plot_smhm_reion(pig, color=None, ls=None, zreion=None, nmesh=0, star=True, m
             fname = "data/gasm-" + fname
     #np.savetxt(fname, np.vstack((masses[ii], smhm_lower[ii], smhm_bin[ii], smhm_upper[ii])).T, header="# "+label+" (mass : SMHM (16, 50, 84))")
 
+def plot_smhm_conc(pig, color=None, ls=None, zreion=None, nmesh=0):
+    """Plot the gas mass to density at fixed halo mass. """
+    bf = BigFile(pig)
+    hh = bf["Header"].attrs["HubbleParam"]
+    fofmasses = bf['FOFGroups/Mass'][:]*1e10/hh
+    ##
+    fofpos = bf['FOFGroups/MassCenterPosition'][:]
+    ##
+    gasmasses = bf['FOFGroups/MassByType'][:][:,0]*1e10/hh
+    smhm = gasmasses/fofmasses
+    del gasmasses
+    #This is sum(m_i r_i r_j), the moment of inertia tensor.
+    imom = bf['FOFGroups/Imom'][:]*1e10/hh**3
+    #Average the diagonal elements of the inertia tensor to get a rough radius (in Mpc).
+    modr = np.sqrt((imom[:,0] + imom[:,3+1] + imom[:,6+2])/3. / fofmasses)
+    density = fofmasses / (4/3.*np.pi * modr**3)
+    omega0 = bf["Header"].attrs["Omega0"]
+    omegab = bf["Header"].attrs["OmegaBaryon"]
+    zz = 1/bf["Header"].attrs["Time"]-1
+    box = bf["Header"].attrs["BoxSize"]
+    label = "z=%d" % zz
+    factor = omega0 / omegab
+    massbin = 1e10
+    ii = np.where((fofmasses > massbin / 1.3)*(fofmasses < massbin * 1.3))
+    (binned_smhm, bind_edges, _) = scipy.stats.binned_statistic(np.log10(density[ii]), smhm[ii], statistic='median', bins=20)
+    plt.semilogx(10**((bind_edges[1:]+ bind_edges[:-1])/2), binned_smhm, ls="-", color=color)
+    zpos = fofpos[ii] / box * nmesh
+    fofzreion = np.array([zreion[int(zp[0]), int(zp[1]), int(zp[2])] for zp in zpos])
+    jj = np.where(fofzreion < 7.5)
+    (binned_smhm, bind_edges, _) = scipy.stats.binned_statistic(np.log10(density[ii][jj]), smhm[ii][jj], statistic='median', bins=20)
+    plt.semilogx(10**((bind_edges[1:]+ bind_edges[:-1])/2), binned_smhm, ls="--", label=r"$z_{re} > 7.5$", color="blue")
+    jj = np.where(fofzreion > 7.5)
+    (binned_smhm, bind_edges, _) = scipy.stats.binned_statistic(np.log10(density[ii][jj]), smhm[ii][jj], statistic='median', bins=20)
+    plt.semilogx(10**((bind_edges[1:]+ bind_edges[:-1])/2), binned_smhm, ls="-.", label=r"$z_{re} < 7.5$", color="red")
+
+def plot_smhms_conc(reds, outdir):
+    """Plot several SMHM over time."""
+    snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
+    pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
+    colors = ["black", "red", "blue", "brown", "grey", "orange"]
+    lss = ["-", "-.", "--", ":"]
+    uvf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
+    zreion = uvf["Zreion_Table"][:]
+    nmesh = uvf["Zreion_Table"].attrs["Nmesh"][0]
+    zreion = zreion.reshape((nmesh, nmesh, nmesh))
+    uvf.close()
+    for ii in np.arange(len(reds)):
+        plot_smhm_conc(pigs[ii], color=colors[ii], ls=lss[ii % 4], zreion=zreion, nmesh=nmesh)
+    plt.xlabel(r"$\rho (M_\odot/\mathrm{Mpc}^3)$")
+    #plt.tight_layout()
+    plt.ylabel(r"$M_g / M_\mathrm{h} (\Omega_M / \Omega_b)$")
+    plt.legend(loc="lower center", ncol=2)
+    plt.savefig("gmhms_conc.pdf")
+
 def plot_smhms_reion(reds, outdir, star=True, metal=False):
     """Plot several SMHM over time."""
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
@@ -676,6 +731,37 @@ def plot_smhms_reion(reds, outdir, star=True, metal=False):
             plt.ylim(0.5, 1)
             plt.savefig("gmhms_reion.pdf")
 
+def get_sfrd(outdir,Lbox=250,hh=0.6774):
+    """Get the star formation rate density"""
+    sfiles = outdir+'/sfr.txt*'
+    files = sorted(glob.glob(sfiles))
+    ts = []
+    sfrs = []
+    for f in files:
+        d = np.loadtxt(f)
+        ts = np.append(ts,d[:,0])
+        sfrs = np.append(sfrs,d[:,2])
+    ts=np.array(ts)
+    zs = np.array(1./ts - 1)
+    zbin = np.linspace(np.min(zs),8,300)
+    zmid = (zbin[:-1]+zbin[1:])/2
+    sout = []
+    for i in range(0,len(zbin)-1):
+        zmask = zs>zbin[i]
+        zmask &= zs<zbin[i+1]
+    sout.append(np.max(sfrs[zmask]))
+    sout = np.array(sout)/((Lbox/hh)**3)
+    return zmid,sout
+
+def plot_sfrd(outdir):
+    """Plot the SFRD"""
+    sfrdir = '/scratch3/06431/yueyingn/pack-asterix/sfr-file'
+    zmid, sout = get_sfrd(sfrdir)
+    plt.semilogy(zmid, sout)
+    plt.xlabel('z')
+    plt.ylabel(r'SFRD ($M_\odot\, \mathrm{yr}^{-1}\, \mathrm{Mpc}^{-3}$)')
+    plt.savefig("sfrd.pdf")
+
 def get_reion_data(keylist):
     """Print data for ionized fraction"""
     ioniz_data = crc.get("ionized_fraction")
@@ -683,6 +769,49 @@ def get_reion_data(keylist):
         data = ioniz_data[key]
         errors = np.vstack([data.err_down, data.err_up])
         plt.errorbar(data.axes, 1-data.values, yerr=errors, fmt='d', label=key, color="black")
+    Bosman_reion_data()
+
+def Bosman_reion_data():
+    """Data from Bosman 2021, 2108.03699. Table 6 with self-shielding.
+    Note derived from a Nyx simulation."""
+    reds = np.array([5.0, 5.1, 5.2, 5.3])
+    mean = np.array([3.020, 3.336, 3.636, 3.598])*1e-5
+    lowerr = np.array([0.058, 0.164, 0.095, 0.145])*1e-5
+    uperr = np.array([0.230, 0.064, 0.131, 0.566])*1e-5
+    errors = np.vstack([lowerr, uperr])
+    plt.errorbar(reds, mean, yerr=errors, fmt='d', label="Bosman 2021", color="black")
+
+def get_neutral_frac_sim(pp, nsamp=10000):
+    """Get the neutral fraction from a particle snapshot."""
+    bf = bigfile.BigFile(pp)
+    partsz = bf["0/NeutralHydrogenFraction"].size
+    inds = np.random.randint(0, partsz, size=nsamp)
+    nhi = np.array([bf["0/NeutralHydrogenFraction"][ii] for ii in inds])
+    vol = np.array([bf["0/SmoothingLength"][ii] for ii in inds])**3
+    xhi = np.sum(nhi * vol) / np.sum(vol)
+    return xhi
+
+def plot_reionization_history_sim(reds, outdir):
+    """Reionization history as a function of redshift."""
+    snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
+    part = [os.path.join(outdir, "PART_%03d") % ss for ss in snaps]
+    print(reds)
+    bf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
+    zreion = bf["Zreion_Table"][:]
+    zreion[np.where(zreion > 10)] = 10
+    bf.close()
+    plt.hist(zreion, 50, cumulative=True, density=True, histtype='step')
+    #Pick some random particles.
+    xhi = np.array([get_neutral_frac_sim(pp) for pp in part])
+    print(xhi)
+    plt.semilogy(reds, xhi, ls="-", color="blue")
+    plt.xlabel('z')
+    plt.ylabel(r'$x_{HI}$')
+    keylist = ['Davies et al. 2018', 'Fan et al. 2006', 'Greig et al. 2019', 'Hoag et al. 2019', 'Mason et al. 2018', 'Ono et al. 2012', 'Ota et al. 2008', 'Wang et al. 2020 (subm.)', 'Yang et al. 2020']
+    get_reion_data(keylist)
+    plt.yscale('log')
+    #plt.tight_layout()
+    plt.savefig("reion_hist_sim.pdf")
 
 def plot_reionization_history(outdir):
     """Reionization history as a function of redshift."""
@@ -695,6 +824,7 @@ def plot_reionization_history(outdir):
     plt.ylabel(r'$x_{HI}$')
     keylist = ['Davies et al. 2018', 'Fan et al. 2006', 'Greig et al. 2019', 'Hoag et al. 2019', 'Mason et al. 2018', 'Ono et al. 2012', 'Ota et al. 2008', 'Wang et al. 2020 (subm.)', 'Yang et al. 2020']
     get_reion_data(keylist)
+    plt.yscale('log')
     #plt.tight_layout()
     plt.savefig("reion_hist.pdf")
 
@@ -806,7 +936,8 @@ if __name__ == "__main__":
     plot_smhms_he_reion(reds2, outdir=simdir, star=False)
     plt.clf()
 
-    plot_reionization_history(outdir=simdir)
+    red_reion = np.array([10,9,8.5,8,7.5,7,6.75,6.5,6.25,6,5.75,5.5,5])
+    plot_reionization_history_sim(red_reion,outdir=simdir)
     plt.clf()
-    plot_zreion(outdir=simdir)
-    plt.clf()
+    #plot_zreion(outdir=simdir)
+    #plt.clf()
