@@ -4,6 +4,7 @@ import glob
 import sys
 import numpy as np
 import scipy.stats
+from multiprocessing import Pool
 import h5py
 import corecon as crc
 import matplotlib.pyplot as plt
@@ -739,25 +740,41 @@ def get_sfrd(outdir,Lbox=250,hh=0.6774):
     sfrs = []
     for f in files:
         d = np.loadtxt(f)
+        if np.size(d) == 0:
+            continue
         ts = np.append(ts,d[:,0])
         sfrs = np.append(sfrs,d[:,2])
     ts=np.array(ts)
     zs = np.array(1./ts - 1)
-    zbin = np.linspace(np.min(zs),8,300)
+    zbin = np.linspace(3,11,300)
     zmid = (zbin[:-1]+zbin[1:])/2
     sout = []
+    zout = []
     for i in range(0,len(zbin)-1):
         zmask = zs>zbin[i]
         zmask &= zs<zbin[i+1]
-    sout.append(np.max(sfrs[zmask]))
+        if np.size(sfrs[zmask]) > 0:
+            sout.append(np.max(sfrs[zmask]))
+            zout.append((zbin[i] + zbin[i+1])/2)
     sout = np.array(sout)/((Lbox/hh)**3)
-    return zmid,sout
+    zout = np.array(zout)
+    return zout,sout
 
-def plot_sfrd(outdir):
+def plot_sfrd():
     """Plot the SFRD"""
     sfrdir = '/scratch3/06431/yueyingn/pack-asterix/sfr-file'
     zmid, sout = get_sfrd(sfrdir)
-    plt.semilogy(zmid, sout)
+    #Bouwens 2015, table 7. https://arxiv.org/abs/1403.4295
+    data = np.array([[3.8 ,  -1.00 ,  0.06 , 0.06],
+    [4.9,     -1.26,   0.06 , 0.06],
+    [5.9 ,    -1.55,  0.06 , 0.06],
+    [6.8  ,  -1.69 , 0.06 , 0.06],
+    [7.9   , -2.08,  0.07 , 0.07],
+    [10.4  ,  -3.13 , 0.45 ,0.36]])
+    plt.plot(zmid, np.log10(sout))
+    plt.errorbar(data[:,0], data[:,1]-0.34, fmt='o', yerr=(data[:,2], data[:,3]), xerr=0.5)
+    #Oesch 2014: https://arxiv.org/abs/1409.1228 text above fig 7.
+    plt.errorbar([10,], np.array([-2.8,])-0.34, fmt='s', yerr=[[0.5,], [0.3,]], xerr=0.5)
     plt.xlabel('z')
     plt.ylabel(r'SFRD ($M_\odot\, \mathrm{yr}^{-1}\, \mathrm{Mpc}^{-3}$)')
     plt.savefig("sfrd.pdf")
@@ -785,6 +802,7 @@ def get_neutral_frac_sim(pp, nsamp=10000):
     """Get the neutral fraction from a particle snapshot."""
     bf = bigfile.BigFile(pp)
     partsz = bf["0/NeutralHydrogenFraction"].size
+    print("Starting %s" % pp, flush=True)
     inds = np.random.randint(0, partsz, size=nsamp)
     nhi = np.array([bf["0/NeutralHydrogenFraction"][ii] for ii in inds])
     vol = np.array([bf["0/SmoothingLength"][ii] for ii in inds])**3
@@ -795,16 +813,22 @@ def plot_reionization_history_sim(reds, outdir):
     """Reionization history as a function of redshift."""
     snaps = find_snapshot(reds, snaptxt=os.path.join(outdir, "Snapshots.txt"))
     part = [os.path.join(outdir, "PART_%03d") % ss for ss in snaps]
-    print(reds)
-    bf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
-    zreion = bf["Zreion_Table"][:]
-    zreion[np.where(zreion > 10)] = 10
-    bf.close()
-    plt.hist(zreion, 50, cumulative=True, density=True, histtype='step')
+    print(reds,flush=True)
+    #bf = BigFile(os.path.join(outdir, "../UVFluctuationFile"))
+    #zreion = bf["Zreion_Table"][:]
+    #zreion[np.where(zreion > 10)] = 10
+    #bf.close()
+    #plt.hist(zreion, 50, cumulative=True, density=True, histtype='step')
+    plt.yscale('log')
+    #plt.tight_layout()
+    plt.savefig("reion_hist_sim.pdf")
     #Pick some random particles.
-    xhi = np.array([get_neutral_frac_sim(pp) for pp in part])
-    print(xhi)
-    plt.semilogy(reds, xhi, ls="-", color="blue")
+    with Pool(20) as p:
+        mapres = p.map(get_neutral_frac_sim, part)
+        xhi = np.array(mapres)
+#        xhi = np.array([get_neutral_frac_sim(pp) for pp in part])
+        print(xhi, flush=True)
+        plt.semilogy(reds, xhi, ls="-", color="blue")
     plt.xlabel('z')
     plt.ylabel(r'$x_{HI}$')
     keylist = ['Davies et al. 2018', 'Fan et al. 2006', 'Greig et al. 2019', 'Hoag et al. 2019', 'Mason et al. 2018', 'Ono et al. 2012', 'Ota et al. 2008', 'Wang et al. 2020 (subm.)', 'Yang et al. 2020']
