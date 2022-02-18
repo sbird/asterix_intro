@@ -764,7 +764,7 @@ def plot_sfrd():
     """Plot the SFRD"""
     sfrdir = '/scratch3/06431/yueyingn/pack-asterix/sfr-file'
     zmid, sout = get_sfrd(sfrdir)
-    np.savetxt("sfrd.txt", (zmid, np.log10(sout)))
+    np.savetxt("data/sfrd.txt", (zmid, np.log10(sout)))
     #From Salpeter to Chabrier
     corrfac = -0.26
     #Bouwens 2015, table 7. https://arxiv.org/abs/1403.4295
