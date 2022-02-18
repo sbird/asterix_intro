@@ -1,0 +1,6 @@
+ASTRID:
+This contains support scripts and datafiles for https://arxiv.org/abs/2111.01160
+Derived simulation datafiles are in 
+data/
+These are direct textfile dumps of the plots in the paper. 
+Scripts to reproduce are in sfr.py
