@@ -746,7 +746,7 @@ def get_sfrd(outdir,Lbox=250,hh=0.6774):
         sfrs = np.append(sfrs,d[:,2])
     ts=np.array(ts)
     zs = np.array(1./ts - 1)
-    zbin = np.linspace(3,11,300)
+    zbin = np.linspace(3,12,300)
     zmid = (zbin[:-1]+zbin[1:])/2
     sout = []
     zout = []
@@ -764,6 +764,9 @@ def plot_sfrd():
     """Plot the SFRD"""
     sfrdir = '/scratch3/06431/yueyingn/pack-asterix/sfr-file'
     zmid, sout = get_sfrd(sfrdir)
+    np.savetxt("sfrd.txt", (zmid, np.log10(sout)))
+    #From Salpeter to Chabrier
+    corrfac = -0.26
     #Bouwens 2015, table 7. https://arxiv.org/abs/1403.4295
     data = np.array([[3.8 ,  -1.00 ,  0.06 , 0.06],
     [4.9,     -1.26,   0.06 , 0.06],
@@ -771,12 +774,17 @@ def plot_sfrd():
     [6.8  ,  -1.69 , 0.06 , 0.06],
     [7.9   , -2.08,  0.07 , 0.07],
     [10.4  ,  -3.13 , 0.45 ,0.36]])
-    plt.plot(zmid, np.log10(sout))
-    plt.errorbar(data[:,0], data[:,1]-0.34, fmt='o', yerr=(data[:,2], data[:,3]), xerr=0.5)
+    plt.plot(zmid, np.log10(sout), color="black")
+    #Coe 2013  1211.3663
+    coedata = np.log10(np.array([1.1e-3,1.4e-3]))
+    coelogerr = np.log10(np.array([[-0.9e-3, -1.1e-3], [1.0e-3, 1.3e-3]]) + 10**coedata)-coedata
+    coelogerr[0,:]*=-1
+    plt.errorbar([9.6, 11], coedata+corrfac, fmt='^', yerr=coelogerr, xerr=0.5, color="red")
+    plt.errorbar(data[:,0], data[:,1]+corrfac, fmt='o', yerr=(data[:,2], data[:,3]), xerr=0.5, color="grey")
     #Oesch 2014: https://arxiv.org/abs/1409.1228 text above fig 7.
-    plt.errorbar([10,], np.array([-2.8,])-0.34, fmt='s', yerr=[[0.5,], [0.3,]], xerr=0.5)
+    plt.errorbar([10,], np.array([-2.8,])+corrfac, fmt='s', yerr=[[0.5,], [0.3,]], xerr=0.5, color="purple")
     plt.xlabel('z')
-    plt.ylabel(r'SFRD ($M_\odot\, \mathrm{yr}^{-1}\, \mathrm{Mpc}^{-3}$)')
+    plt.ylabel(r'log SFRD ($M_\odot\, \mathrm{yr}^{-1}\, \mathrm{Mpc}^{-3}$)')
     plt.savefig("sfrd.pdf")
 
 def get_reion_data(keylist):
