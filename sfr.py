@@ -746,8 +746,7 @@ def get_sfrd(outdir,Lbox=250,hh=0.6774):
         sfrs = np.append(sfrs,d[:,2])
     ts=np.array(ts)
     zs = np.array(1./ts - 1)
-    zbin = np.linspace(3,12,300)
-    zmid = (zbin[:-1]+zbin[1:])/2
+    zbin = np.linspace(2.8,12,300)
     sout = []
     zout = []
     for i in range(0,len(zbin)-1):
@@ -760,29 +759,52 @@ def get_sfrd(outdir,Lbox=250,hh=0.6774):
     zout = np.array(zout)
     return zout,sout
 
-def plot_sfrd():
+def get_sfrd_snap(snap, thresh = 0.3):
+    """Get the SFRD from a snapshot summing only the halos with star formation above a threshold.
+    Thresh is in M_sun/yr."""
+    bf = BigFile(snap)
+    #In Msun/yr
+    sfr = bf["FOFGroups/StarFormationRate"][:]
+    hh = bf["Header"].attrs["HubbleParam"]
+    Lbox = bf["Header"].attrs["BoxSize"]/1000.
+    bf.close()
+    totsfr = np.sum(sfr[np.where(sfr > thresh)])
+    if totsfr == 0:
+        print("No sfr:",snap)
+    #To density
+    totsfr /= (Lbox/hh)**3
+    return totsfr
+
+def plot_sfrd(outdir):
     """Plot the SFRD"""
     sfrdir = '/scratch3/06431/yueyingn/pack-asterix/sfr-file'
     zmid, sout = get_sfrd(sfrdir)
-    np.savetxt("data/sfrd.txt", (zmid, np.log10(sout)))
-    #From Salpeter to Chabrier
-    corrfac = -0.26
-    #Bouwens 2015, table 7. https://arxiv.org/abs/1403.4295
-    data = np.array([[3.8 ,  -1.00 ,  0.06 , 0.06],
-    [4.9,     -1.26,   0.06 , 0.06],
-    [5.9 ,    -1.55,  0.06 , 0.06],
-    [6.8  ,  -1.69 , 0.06 , 0.06],
-    [7.9   , -2.08,  0.07 , 0.07],
-    [10.4  ,  -3.13 , 0.45 ,0.36]])
     plt.plot(zmid, np.log10(sout), color="black")
-    #Coe 2013  1211.3663
-    coedata = np.log10(np.array([1.1e-3,1.4e-3]))
-    coelogerr = np.log10(np.array([[-0.9e-3, -1.1e-3], [1.0e-3, 1.3e-3]]) + 10**coedata)-coedata
-    coelogerr[0,:]*=-1
-    plt.errorbar([9.6, 11], coedata+corrfac, fmt='^', yerr=coelogerr, xerr=0.5, color="red")
-    plt.errorbar(data[:,0], data[:,1]+corrfac, fmt='o', yerr=(data[:,2], data[:,3]), xerr=0.5, color="grey")
-    #Oesch 2014: https://arxiv.org/abs/1409.1228 text above fig 7.
-    plt.errorbar([10,], np.array([-2.8,])+corrfac, fmt='s', yerr=[[0.5,], [0.3,]], xerr=0.5, color="purple")
+    snaps = np.array([13, 17, 20, 23, 31, 39, 47, 107, 127, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 150, 153, 156, 159, 162, 165, 168, 171, 174, 177, 180, 183, 186, 189, 192, 195, 198, 201, 204, 207, 210, 212, 214, 220])
+    pigs = [os.path.join(outdir, "PIG_%03d") % ss for ss in snaps]
+    logsfr = np.log10(np.array([get_sfrd_snap(pp, thresh=0.3) for pp in pigs]))
+    logsfr = np.ravel(logsfr)
+    snaptxt = np.loadtxt(os.path.join(outdir, "Snapshots.txt"))
+    reds = 1./np.array([snaptxt[ii, 1] for ii in snaps])-1
+    plt.plot(reds, logsfr, color="grey", ls="--")
+    np.savetxt("data/sfrd.txt", [zmid, np.log10(sout)])
+    np.savetxt("data/sfrd-0.3.txt", [reds, logsfr])
+    #This is for SFR > 0.3 M_sun/yr.
+    #From Salpeter to Chabrier: 1403.0007
+    corrfac = -1*np.log10(1.64)
+    #These are from Table 5 of Oesch 2018, 1710.11131
+    #z=9 is from 1309.2280
+    #Is this really 10? It looks by eye like 10.2
+    plt.errorbar([10.2, 9], np.array([-3.29, -3.14]), fmt='s', yerr=[0.16,0.21], xerr=0.5, color="purple")
+    #Bouwens 2016, table 8. https://arxiv.org/abs/1606.05280
+    data = np.array([[3.0 ,  -1.01 ,  0.09 , 0.09],
+                     [3.8,     -1.24,   0.13 , 0.13],
+                     [4.9 ,    -1.46,  0.12 , 0.12],
+                     [5.9  ,  -1.73 , 0.13 , 0.13],
+                     [6.8   , -1.89,  0.07 , 0.07],
+                     [7.9   , -2.20,  0.07 , 0.07]])
+#    [10.4  ,  -3.28 , 0.45 ,0.36]])
+    plt.errorbar(data[:,0], data[:,1], fmt='o', yerr=data[:,2], xerr=0.5, color="brown")
     plt.xlabel('z')
     plt.ylabel(r'log SFRD ($M_\odot\, \mathrm{yr}^{-1}\, \mathrm{Mpc}^{-3}$)')
     plt.savefig("sfrd.pdf")
@@ -808,7 +830,7 @@ def Bosman_reion_data():
 
 def get_neutral_frac_sim(pp, nsamp=10000):
     """Get the neutral fraction from a particle snapshot."""
-    bf = bigfile.BigFile(pp)
+    bf = BigFile(pp)
     partsz = bf["0/NeutralHydrogenFraction"].size
     print("Starting %s" % pp, flush=True)
     inds = np.random.randint(0, partsz, size=nsamp)
@@ -937,7 +959,7 @@ if __name__ == "__main__":
     simdir = sys.argv[1]
     red = np.array([9, 8.3, 8, 7.5, 7, 6.5, 6, 5])
     plt.figure()
-    plot_sfrd()
+    plot_sfrd(outdir=simdir)
     plt.clf()
     plot_avg_sfr_reion(red, outdir=simdir)
     plt.clf()
